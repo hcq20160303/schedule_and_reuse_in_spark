@@ -2,53 +2,19 @@ package rddShare.main
 
 import java.util.ArrayList
 
+import scala.reflect.ClassTag
+
 /**
  * Created by hcq on 16-5-5.
  */
-class CacheMetaData {
+class CacheMetaData(
+      val nodesList: ArrayList[SimulateRDD],    // DAG图的各个节点
+      val outputFilename: String                // 结果保存的文件名
+     ) extends Serializable {
 
-  def this(nodesList: ArrayList[Pair[SimulateRDD, SimulateRDD]], outputFilename: String) {
-    this()
-    this.nodesList = nodesList
-    this.outputFilename = outputFilename
-  }
-
-  var nodesList: ArrayList[Pair[SimulateRDD, SimulateRDD]] = null
-  var outputFilename: String = null
-
+  @transient val root = nodesList.get(nodesList.size()-1)  // DAG的根节点
   var sizoOfInputData: Double = .0
   var sizoOfOutputData: Double = .0
   var exeTimeOfDag: Double = .0
 
-  def getOutputFilename: String = {
-    return outputFilename
-  }
-
-  def setOutputFilename(outputFilename: String) {
-    this.outputFilename = outputFilename
-  }
-
-  def getSizoOfInputData: Double = {
-    return sizoOfInputData
-  }
-
-  def setSizoOfInputData(sizoOfInputData: Double) {
-    this.sizoOfInputData = sizoOfInputData
-  }
-
-  def getSizoOfOutputData: Double = {
-    return sizoOfOutputData
-  }
-
-  def setSizoOfOutputData(sizoOfOutputData: Double) {
-    this.sizoOfOutputData = sizoOfOutputData
-  }
-
-  def getExeTimeOfDag: Double = {
-    return exeTimeOfDag
-  }
-
-  def setExeTimeOfDag(exeTimeOfDag: Double) {
-    this.exeTimeOfDag = exeTimeOfDag
-  }
 }
