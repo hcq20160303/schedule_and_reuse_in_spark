@@ -1744,7 +1744,13 @@ abstract class RDD[T: ClassTag](
    * ----------- hcq add code -------------
    */
   var indexOfnodesList: Int = 0
+  var indexOfleftInNodesList: Int = -1
   var transformation: String = null
+  var isCache = false
+
+  def changeDependeces( parent: RDD[_]): Unit = {
+    this.dependencies_ = List(new OneToOneDependency(parent))
+  }
 }
 
 

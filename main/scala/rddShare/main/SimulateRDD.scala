@@ -4,8 +4,6 @@ import java.util.ArrayList
 
 import org.apache.spark.rdd.RDD
 
-import scala.reflect.ClassTag
-
 /**
  * Created by hcq on 16-5-5.
  */
@@ -35,5 +33,4 @@ class SimulateRDD(
     }
     return false
   }
-
 }

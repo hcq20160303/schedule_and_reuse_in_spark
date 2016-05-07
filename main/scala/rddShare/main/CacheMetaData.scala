@@ -1,14 +1,12 @@
 package rddShare.main
 
-import java.util.ArrayList
-
-import scala.reflect.ClassTag
+import java.util
 
 /**
  * Created by hcq on 16-5-5.
  */
 class CacheMetaData(
-      val nodesList: ArrayList[SimulateRDD],    // DAG图的各个节点
+      val nodesList: util.List[SimulateRDD],    // DAG图的各个节点
       val outputFilename: String                // 结果保存的文件名
      ) extends Serializable {
 
