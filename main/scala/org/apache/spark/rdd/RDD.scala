@@ -19,6 +19,8 @@ package org.apache.spark.rdd
 
 import java.util.Random
 
+import rddShare.tool.MyUtils
+
 import scala.collection.{mutable, Map}
 import scala.collection.mutable.ArrayBuffer
 import scala.language.implicitConversions
@@ -312,7 +314,13 @@ abstract class RDD[T: ClassTag](
    */
   def map[U: ClassTag](f: T => U): RDD[U] = withScope {
     val cleanF = sc.clean(f)
-    new MapPartitionsRDD[U, T](this, (context, pid, iter) => iter.map(cleanF))
+    val mapRDD = new MapPartitionsRDD[U, T](this, (context, pid, iter) => iter.map(cleanF))
+    mapRDD.transformation = "map"
+    val input = f.getClass.getResourceAsStream(f.getClass.toString)
+    if ( !(this.transformation.equals("textFile") || this.transformation.equals("objectFile") )){
+      mapRDD.function = MyUtils.getFunctionOfRDD(input, _sc.hashCode() + "/" + f.getClass.toString)
+    }
+    mapRDD
   }
 
   /**
@@ -321,7 +329,13 @@ abstract class RDD[T: ClassTag](
    */
   def flatMap[U: ClassTag](f: T => TraversableOnce[U]): RDD[U] = withScope {
     val cleanF = sc.clean(f)
-    new MapPartitionsRDD[U, T](this, (context, pid, iter) => iter.flatMap(cleanF))
+    val flatMapRDD = new MapPartitionsRDD[U, T](this, (context, pid, iter) => iter.flatMap(cleanF))
+    flatMapRDD.transformation = "flatMap"
+    val input = f.getClass.getResourceAsStream(f.getClass.toString)
+    if ( !(this.transformation.equals("textFile") || this.transformation.equals("objectFile") )){
+      flatMapRDD.function = MyUtils.getFunctionOfRDD(input, _sc.hashCode() + "/" + f.getClass.toString)
+    }
+    flatMapRDD
   }
 
   /**
@@ -520,11 +534,15 @@ abstract class RDD[T: ClassTag](
    * times (use `.distinct()` to eliminate them).
    */
   def union(other: RDD[T]): RDD[T] = withScope {
+    var unionRDD: RDD[T] = null
     if (partitioner.isDefined && other.partitioner == partitioner) {
-      new PartitionerAwareUnionRDD(sc, Array(this, other))
+      unionRDD = new PartitionerAwareUnionRDD(sc, Array(this, other))
     } else {
-      new UnionRDD(sc, Array(this, other))
+      unionRDD = new UnionRDD(sc, Array(this, other))
     }
+    unionRDD.transformation = "union"
+    unionRDD.function = "union"
+    unionRDD
   }
 
   /**
@@ -1746,6 +1764,7 @@ abstract class RDD[T: ClassTag](
   var indexOfnodesList: Int = 0
   var indexOfleftInNodesList: Int = -1
   var transformation: String = null
+  var function: String = null
   var isCache = false
 
   def changeDependeces( parent: RDD[_]): Unit = {

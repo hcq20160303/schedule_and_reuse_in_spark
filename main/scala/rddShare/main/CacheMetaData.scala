@@ -14,5 +14,6 @@ class CacheMetaData(
   var sizoOfInputData: Double = .0
   var sizoOfOutputData: Double = .0
   var exeTimeOfDag: Double = .0
+  var use: Int = 0
 
 }

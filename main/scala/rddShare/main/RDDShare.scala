@@ -3,7 +3,7 @@ package rddShare.main
 //import java.util._
 
 import java.util
-import java.util.{ArrayList, TreeSet, HashMap, Set, Comparator}
+import java.util.{ArrayList, Comparator, HashMap, TreeSet}
 
 import org.apache.spark.rdd.RDD
 
@@ -16,11 +16,9 @@ import scala.util.parsing.json.JSON
  */
 class RDDShare(private val finalRDD: RDD[_]) {
 
-  private val nodesList = new ArrayList[SimulateRDD]    // 按深度遍历的顺序得到DAG图的各个节点
+  private val nodesList = new ArrayList[SimulateRDD]       // 按深度遍历的顺序得到DAG图的各个节点
   private val cacheRDD = new ArrayList[RDD[_]]             // DAG中需要缓存的RDD
   private val indexOfDagScan = new ArrayList[Integer]      // DAG的输入
-
-
 
   /**
    * 匹配及改写函数：该函数将一个输入的DAG和缓存当中的所有DAG进行匹配找到可重用的缓存并改写当前的DAG
@@ -92,6 +90,9 @@ class RDDShare(private val finalRDD: RDD[_]) {
           val addCache = new CacheMetaData(nodesList.subList(node.realRDD.indexOfleftInNodesList,
                                                               node.realRDD.indexOfnodesList)
                                            , cachePath)
+          /**
+           * add need to syn
+           */
           RDDShare.synchronized(RDDShare.repository.add(addCache))
       }
     }
@@ -99,11 +100,44 @@ class RDDShare(private val finalRDD: RDD[_]) {
 
   /**
    * 缓存管理函数：该函数完成缓存的管理工作，当出现以下情况之一触发该操作：
-   * 1） 缓存总大小超过设定阈值；
-   * 2） 缓存超过设定时间未更新；
-   * 3） 缓存中的某个DAG的输入被删除或者被修改。
+   * 1. replace
+   * * 1） 缓存总大小超过设定阈值；
+   * * 2） 缓存超过设定时间未更新；
+   * 2. maintain consistency
+   * * 1) 缓存中的某个DAG的输入被删除或者被修改。
    */
-  def cacheManage(): Unit = {
+  def cacheManage(manageType: String, needCacheSize: Double, deleteData: String = null): Unit = {
+    manageType match {
+      case "replace" => {
+        /**
+         * replace algrothom
+         * 1. "use" less, replace first
+         * 2. if "use" equal, then more "exeTimeOfDag", replace first
+         */
+        val repo = RDDShare.repository.toArray.asInstanceOf[Array[CacheMetaData]]
+                                      .sortWith( (x: CacheMetaData, y: CacheMetaData) => (x.use < y.use && x.exeTimeOfDag > y.exeTimeOfDag) ).iterator
+        var find = false
+        var needCacheSizeCopy = needCacheSize
+        while( repo.hasNext && !find ){
+          val cache = repo.next()
+          if ( cache.sizoOfOutputData >= needCacheSizeCopy ){
+            find = true
+          }else{
+            needCacheSizeCopy -= cache.sizoOfOutputData
+          }
+          /**
+           * remove need to syn
+           */
+          RDDShare.synchronized(RDDShare.repository.remove(cache))
+        }
+      }
+
+      case "consistency" => {
+        /**
+         * maintain consistency
+         */
+      }
+    }
   }
 
 }
@@ -113,10 +147,39 @@ object RDDShare{
   def main(args: Array[String]): Unit ={
   }
 
-  private val basePath = initBasePath()
-  def initBasePath(): String ={
-    val path = Source.fromFile("../../../resources/rddShare/default").getLines()
-    path.next().split("=")(1)
+  private var basePath: String = null
+  def getBasePath = basePath
+
+  private var CACHE_TRANSFORMATION: Predef.Set[String] = null
+  private var cacheSize: Double = 0
+
+  def init(): Unit ={
+    val conf = Source.fromFile("../../../resources/rddShare/default").getLines().toArray
+    basePath = conf(0).split("=")(1)
+    CACHE_TRANSFORMATION = conf(1).split("=")(1).split(" ").toSet
+    cacheSize = conf(2).split("=")(1).toDouble
+  }
+
+  private val TRANSFORMATION_PRIORITY: HashMap[String, Integer] = initTRANSFORMATION_PRIORITY()
+
+  private def initTRANSFORMATION_PRIORITY(): HashMap[String, Integer] = {
+
+    val tranformtion_priority = new HashMap[String, Integer]
+
+    val jsonLines = Source.fromFile("../../../resources/rddShare/transformation.json").getLines()
+    jsonLines.foreach( line => {
+      val transformationAndPriority = JSON.parseFull(line)
+      transformationAndPriority match {
+        case Some(m: Map[String, Any]) => {
+          tranformtion_priority.put(
+            m.get("transformation") match { case Some(tran: Any) => tran.toString },
+            m.get("priority")       match { case Some(pri: Any) => pri.asInstanceOf[Int] }
+          )
+        }
+      }}
+    )
+
+    tranformtion_priority
   }
 
   private val repository: TreeSet[CacheMetaData] = new TreeSet[CacheMetaData](new Comparator[CacheMetaData]() {
@@ -166,30 +229,6 @@ object RDDShare{
     }
   })
 
-  private val CACHE_TRANSFORMATION: Set[String] = TRANSFORMATION_PRIORITY.keySet()
-
-  private val TRANSFORMATION_PRIORITY: HashMap[String, Integer] = initTRANSFORMATION_PRIORITY()
-
-  private def initTRANSFORMATION_PRIORITY(): HashMap[String, Integer] = {
-
-    val tranformtion_priority = new HashMap[String, Integer]
-
-    val jsonLines = Source.fromFile("../../../resources/rddShare/transformation.json").getLines()
-    jsonLines.foreach( line => {
-      val transformationAndPriority = JSON.parseFull(line)
-      transformationAndPriority match {
-        case Some(m: Map[String, Any]) => {
-          tranformtion_priority.put(
-            m.get("transformation") match { case Some(tran: Any) => tran.toString },
-            m.get("priority")       match { case Some(pri: Any) => pri.asInstanceOf[Int] }
-          )
-        }
-      }}
-    )
-
-    tranformtion_priority
-  }
-
   /**
    * 将指定的DAG图按深度遍历的顺序得到DAG图中的各个节点
    */
@@ -205,17 +244,17 @@ object RDDShare{
       node.dependencies.map(_.rdd).foreach(child => transformDAGtoList(node, child, nodesList, indexOfDagScan))
     }
 
-    val simulateRDD = new SimulateRDD(node.transformation, node)
+    val simulateRDD = new SimulateRDD(node.transformation, node.function, node)
     /**
      * 判断RDD的操作是否是表扫描或者读取外部数据
      */
     nodesList.add(simulateRDD)
-    if ( node.name.contains("""/""") ){
+    if ( node.transformation.equalsIgnoreCase("hadoopFile") ){
       val index = nodesList.indexOf(simulateRDD)
       node.indexOfnodesList = index    // 记录下该RDD在nodesList的位置，以后需要通过该下标找到RDD对应的SimulateRDD
       node.indexOfleftInNodesList = index
       indexOfDagScan.add(index)
-      simulateRDD.inputFilename.add(node.transformation)
+      simulateRDD.inputFilename.add(node.name)
     }
     /**
      * bug2:根节点的allTransformation没有赋值

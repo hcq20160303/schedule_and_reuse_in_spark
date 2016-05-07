@@ -21,32 +21,31 @@ import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.{Date, HashMap => JHashMap}
 
-import scala.collection.{Map, mutable}
-import scala.collection.JavaConversions._
-import scala.collection.mutable.ArrayBuffer
-import scala.reflect.ClassTag
-import scala.util.DynamicVariable
-
 import com.clearspring.analytics.stream.cardinality.HyperLogLogPlus
 import org.apache.hadoop.conf.{Configurable, Configuration}
 import org.apache.hadoop.fs.FileSystem
 import org.apache.hadoop.io.SequenceFile.CompressionType
 import org.apache.hadoop.io.compress.CompressionCodec
 import org.apache.hadoop.mapred.{FileOutputCommitter, FileOutputFormat, JobConf, OutputFormat}
-import org.apache.hadoop.mapreduce.{Job => NewAPIHadoopJob, OutputFormat => NewOutputFormat,
-  RecordWriter => NewRecordWriter}
-
-import org.apache.spark._
+import org.apache.hadoop.mapreduce.{Job => NewAPIHadoopJob, OutputFormat => NewOutputFormat, RecordWriter => NewRecordWriter}
 import org.apache.spark.Partitioner.defaultPartitioner
+import org.apache.spark._
 import org.apache.spark.annotation.Experimental
 import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.executor.{DataWriteMethod, OutputMetrics}
 import org.apache.spark.mapreduce.SparkHadoopMapReduceUtil
 import org.apache.spark.partial.{BoundedDouble, PartialResult}
 import org.apache.spark.serializer.Serializer
-import org.apache.spark.util.{SerializableConfiguration, Utils}
 import org.apache.spark.util.collection.CompactBuffer
 import org.apache.spark.util.random.StratifiedSamplingUtils
+import org.apache.spark.util.{SerializableConfiguration, Utils}
+import rddShare.tool.MyUtils
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.{Map, mutable}
+import scala.reflect.ClassTag
+import scala.util.DynamicVariable
 
 /**
  * Extra functions available on RDDs of (key, value) pairs through an implicit conversion.
@@ -287,7 +286,13 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * parallelism level.
    */
   def reduceByKey(func: (V, V) => V): RDD[(K, V)] = self.withScope {
-    reduceByKey(defaultPartitioner(self), func)
+    val reduceRDD = reduceByKey(defaultPartitioner(self), func)
+    reduceRDD.transformation = "reduceByKey"
+    val input = func.getClass.getResourceAsStream(func.getClass.toString)
+    if ( !(self.transformation.equals("textFile") || self.transformation.equals("objectFile") )){
+      reduceRDD.function = MyUtils.getFunctionOfRDD(input, reduceRDD.sparkContext.hashCode() + "/" + func.getClass.toString)
+    }
+    reduceRDD
   }
 
   /**
@@ -584,7 +589,10 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * or [[PairRDDFunctions.reduceByKey]] will provide much better performance.
    */
   def groupByKey(): RDD[(K, Iterable[V])] = self.withScope {
-    groupByKey(defaultPartitioner(self))
+    val groupRDD = groupByKey(defaultPartitioner(self))
+    groupRDD.transformation = "groupByKey"
+    groupRDD.function = "groupByKey"
+    groupRDD
   }
 
   /**
@@ -593,7 +601,10 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
    * (k, v2) is in `other`. Performs a hash join across the cluster.
    */
   def join[W](other: RDD[(K, W)]): RDD[(K, (V, W))] = self.withScope {
-    join(other, defaultPartitioner(self, other))
+    val joinRDD = join(other, defaultPartitioner(self, other))
+    joinRDD.transformation = "join"
+    joinRDD.function = "join"
+    joinRDD
   }
 
   /**

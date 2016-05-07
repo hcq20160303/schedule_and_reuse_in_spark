@@ -815,8 +815,13 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       path: String,
       minPartitions: Int = defaultMinPartitions): RDD[String] = withScope {
     assertNotStopped()
-    hadoopFile(path, classOf[TextInputFormat], classOf[LongWritable], classOf[Text],
-      minPartitions).map(pair => pair._2.toString)
+    val textRDD = hadoopFile(path, classOf[TextInputFormat], classOf[LongWritable], classOf[Text],
+      minPartitions)
+    textRDD.transformation="textFile"
+    textRDD.function=path
+    val mapRDD = textRDD.map(pair => pair._2.toString)
+    mapRDD.function="pair => pair._2.toString"
+    mapRDD
   }
 
   /**
@@ -1210,8 +1215,12 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
       path: String,
       minPartitions: Int = defaultMinPartitions): RDD[T] = withScope {
     assertNotStopped()
-    sequenceFile(path, classOf[NullWritable], classOf[BytesWritable], minPartitions)
-      .flatMap(x => Utils.deserialize[Array[T]](x._2.getBytes, Utils.getContextOrSparkClassLoader))
+    val objectRDD = sequenceFile(path, classOf[NullWritable], classOf[BytesWritable], minPartitions)
+    objectRDD.transformation = "objectFile"
+    objectRDD.function = path
+    val flatMapRDD = objectRDD.flatMap(x => Utils.deserialize[Array[T]](x._2.getBytes, Utils.getContextOrSparkClassLoader))
+    flatMapRDD.function = "x => Utils.deserialize[Array[T]](x._2.getBytes, Utils.getContextOrSparkClassLoader"
+    flatMapRDD
   }
 
   protected[spark] def checkpointFile[T: ClassTag](path: String): RDD[T] = withScope {
