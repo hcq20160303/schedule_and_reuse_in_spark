@@ -289,8 +289,15 @@ class PairRDDFunctions[K, V](self: RDD[(K, V)])
     val reduceRDD = reduceByKey(defaultPartitioner(self), func)
     reduceRDD.transformation = "reduceByKey"
     val input = func.getClass.getResourceAsStream(func.getClass.toString)
-    if ( !(self.transformation.equals("textFile") || self.transformation.equals("objectFile") )){
-      reduceRDD.function = MyUtils.getFunctionOfRDD(input, reduceRDD.sparkContext.hashCode() + "/" + func.getClass.toString)
+    /**
+     * 1. When we involved textFile or objectFile use sc, these two method will generate two rdd,
+     * one is hadoopRDD, and other is map RDD, so we don't need to get the function of the latter.
+     * 2. Also as the interal Spark will generate lots of rdd, so we should exclude these rdd
+     */
+    if ( !(self.transformation.equals("textFile") || self.transformation.equals("objectFile") )  // exclude 1
+      && !func.getClass.toString.contains("org.apache") ){  // exclude 2
+      val fun = func.getClass.toString.split(".")
+      reduceRDD.function = MyUtils.getFunctionOfRDD(input, reduceRDD.sparkContext.hashCode() + "/" + fun(fun.length))
     }
     reduceRDD
   }

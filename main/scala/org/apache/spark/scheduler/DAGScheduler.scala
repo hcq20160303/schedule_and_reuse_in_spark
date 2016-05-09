@@ -22,6 +22,8 @@ import java.util.Properties
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
+import rddShare.core.RDDShare
+
 import scala.collection.Map
 import scala.collection.mutable.{ArrayBuffer, HashMap, HashSet, Stack}
 import scala.concurrent.duration._
@@ -554,6 +556,11 @@ class DAGScheduler(
       callSite: CallSite,
       resultHandler: (Int, U) => Unit,
       properties: Properties): Unit = {
+    if ( !rdd.isCache ){
+      val rddShare = new RDDShare(rdd)
+      rddShare.dagMatcherAndRewriter
+      rddShare.getCache
+    }
     val start = System.nanoTime
     val waiter = submitJob(rdd, func, partitions, callSite, resultHandler, properties)
     waiter.awaitResult() match {

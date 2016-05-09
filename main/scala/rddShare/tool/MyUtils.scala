@@ -2,11 +2,10 @@ package rddShare.tool
 
 import java.io._
 
-import rddShare.main.RDDShare
+import rddShare.core.RDDShare
 
 import scala.io.Source
 import scala.sys.process.Process
-
 /**
  * Created by hcq on 16-5-7.
  */

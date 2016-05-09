@@ -17,11 +17,12 @@ object RddShareCopy {
     val slices = 2
     val n = math.min(10L * slices, Int.MaxValue).toInt // avoid overflow
     val rdd1 = sc.parallelize(1 until n, slices).map(x => (x, 1))
-    rdd1.saveAsObjectFile("/home/hcq/Documents/spark_1.5.0/cache/rdd1")
+    rdd1.saveAsObjectFile("/home/hcq/Documents/spark_1.5.0/cache/" + sc.hashCode() + "/rdd1")
 //    val rdd3 = sc.objectFile[rdd1]("/home/hcq/Documents/spark_1.5.0/cache")
-    val rdd2 = sc.objectFile[rdd1.type]("/home/hcq/Documents/spark_1.5.0/cache/rdd1")
+    val rdd2 = sc.objectFile("/home/hcq/Documents/spark_1.5.0/cache/" + sc.hashCode() + "/rdd1")
     val rdd3 = rdd1.map(x => (x._1, 3))
     rdd3.changeDependeces(rdd2)
+    rdd2.foreach(print)
     rdd3.foreach(print )
   }
 

@@ -1,4 +1,4 @@
-package rddShare.main;
+package rddShare.core;
 
 import junit.framework.TestCase;
 
