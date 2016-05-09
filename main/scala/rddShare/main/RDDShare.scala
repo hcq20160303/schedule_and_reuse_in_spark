@@ -40,7 +40,9 @@ class RDDShare(private val finalRDD: RDD[_]) {
           /**
            * 将cache和DAG中的每个Load操作符进行比较
            */
-          for ( idOfDagScan: Int <- indexOfDagScan ) {
+          val ite = indexOfDagScan.iterator()
+          while ( ite.hasNext ) {
+            val idOfDagScan = ite.next()
             indexOfDagScan.remove(idOfDagScan)
             /**
              * Matcher
@@ -64,8 +66,9 @@ class RDDShare(private val finalRDD: RDD[_]) {
              * Rewriter
              */
             if (isMatch) {   // 完全匹配则改写DAG
-              val rewriter = this.finalRDD.sparkContext.objectFile(cacheMetaData.outputFilename)
-              val parent = nodesList.get(index - 1).parent
+              val realRDD = nodesList.get(indexOfdag - 1).realRDD
+              val rewriter = this.finalRDD.sparkContext.objectFile[realRDD.type](cacheMetaData.outputFilename)
+              val parent = nodesList.get(indexOfdag - 1).parent
               parent.changeDependeces(rewriter)
             }
           }
@@ -78,8 +81,11 @@ class RDDShare(private val finalRDD: RDD[_]) {
    * 缓存挑选函数：该函数从输入的DAG当中选择需要缓存的子DAG
    */
   def getCacheRDD(): Unit = {
-    for ( node: SimulateRDD <- nodesList){
-      if ( RDDShare.CACHE_TRANSFORMATION.contains(node.transformation)){
+    val size = nodesList.size()
+    for ( i <- (size-1) to 0){
+      val node = nodesList.get(i)
+      // cache this RDD if this RDD is contained by the CACHE_TRANSFORMATION and not read data from repository
+      if ( RDDShare.CACHE_TRANSFORMATION.contains(node.transformation) && !node.realRDD.fromCache){
           node.realRDD.isCache = true
 
           val cachePath = RDDShare.basePath + node.realRDD.sparkContext.hashCode()+ "/" +
