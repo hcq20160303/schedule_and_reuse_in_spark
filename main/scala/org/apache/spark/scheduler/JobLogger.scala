@@ -117,7 +117,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
    * Write info into log file
    * @param jobId ID of the job
    * @param info Info to be recorded
-   * @param withTime Controls whether to record time stamp before the info, default is true
+   * @param withTime Controls whether to record time stamp before the info, default.conf is true
    */
   protected def jobLogInfo(jobId: Int, info: String, withTime: Boolean = true) {
     var writeInfo = info
@@ -134,7 +134,7 @@ class JobLogger(val user: String, val logDirName: String) extends SparkListener 
    * Write info into log file
    * @param stageId ID of the stage
    * @param info Info to be recorded
-   * @param withTime Controls whether to record time stamp before the info, default is true
+   * @param withTime Controls whether to record time stamp before the info, default.conf is true
    */
   protected def stageLogInfo(stageId: Int, info: String, withTime: Boolean = true) {
     stageIdToJobId.get(stageId).foreach(jobId => jobLogInfo(jobId, info, withTime))

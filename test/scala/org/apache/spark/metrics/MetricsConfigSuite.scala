@@ -30,7 +30,7 @@ class MetricsConfigSuite extends SparkFunSuite with BeforeAndAfter {
     filePath = getClass.getClassLoader.getResource("test_metrics_config.properties").getFile()
   }
 
-  test("MetricsConfig with default properties") {
+  test("MetricsConfig with default.conf properties") {
     val sparkConf = new SparkConf(loadDefaults = false)
     sparkConf.set("spark.metrics.conf", "dummy-file")
     val conf = new MetricsConfig(sparkConf)

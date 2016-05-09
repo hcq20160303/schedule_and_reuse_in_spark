@@ -83,7 +83,7 @@ class PoolSuite extends SparkFunSuite with LocalSparkContext {
     schedulableBuilder.buildPools()
 
     // Ensure that the XML file was read in correctly.
-    assert(rootPool.getSchedulableByName("default") != null)
+    assert(rootPool.getSchedulableByName("default.conf") != null)
     assert(rootPool.getSchedulableByName("1") != null)
     assert(rootPool.getSchedulableByName("2") != null)
     assert(rootPool.getSchedulableByName("3") != null)

@@ -49,7 +49,7 @@ private[spark] class JdbcPartition(idx: Int, val lower: Long, val upper: Long) e
  *   the query would be executed twice, once with (1, 10) and once with (11, 20)
  * @param mapRow a function from a ResultSet to a single row of the desired result type(s).
  *   This should only call getInt, getString, etc; the RDD takes care of calling next.
- *   The default maps a ResultSet to an array of Object.
+ *   The default.conf maps a ResultSet to an array of Object.
  */
 class JdbcRDD[T: ClassTag](
     sc: SparkContext,
@@ -153,7 +153,7 @@ object JdbcRDD {
    *   the query would be executed twice, once with (1, 10) and once with (11, 20)
    * @param mapRow a function from a ResultSet to a single row of the desired result type(s).
    *   This should only call getInt, getString, etc; the RDD takes care of calling next.
-   *   The default maps a ResultSet to an array of Object.
+   *   The default.conf maps a ResultSet to an array of Object.
    */
   def create[T](
       sc: JavaSparkContext,

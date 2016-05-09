@@ -216,7 +216,7 @@ private[deploy] object IvyTestUtils {
         |        revision="${artifact.version}"
         |        status="release" publication="20150405222456" />
         |  <configurations>
-        |    <conf name="default" visibility="public" description="" extends="runtime,master"/>
+        |    <conf name="default.conf" visibility="public" description="" extends="runtime,master"/>
         |    <conf name="compile" visibility="public" description=""/>
         |    <conf name="master" visibility="public" description=""/>
         |    <conf name="runtime" visibility="public" description="" extends="compile"/>

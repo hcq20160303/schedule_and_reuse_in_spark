@@ -37,7 +37,7 @@ import org.apache.spark.util.{ShutdownHookManager, Utils}
 
 /**
  * Creates and maintains the logical mapping between logical blocks and tachyon fs locations. By
- * default, one block is mapped to one file with a name given by its BlockId.
+ * default.conf, one block is mapped to one file with a name given by its BlockId.
  *
  */
 private[spark] class TachyonBlockManager() extends ExternalBlockManager with Logging {

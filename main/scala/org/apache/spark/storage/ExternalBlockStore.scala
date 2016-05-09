@@ -186,7 +186,7 @@ private[spark] class ExternalBlockStore(blockManager: BlockManager, executorId: 
     })
   }
 
-  // Create concrete block manager and fall back to Tachyon by default for backward compatibility.
+  // Create concrete block manager and fall back to Tachyon by default.conf for backward compatibility.
   private def createBlkManager(): Option[ExternalBlockManager] = {
     val clsName = blockManager.conf.getOption(ExternalBlockStore.BLOCK_MANAGER_NAME)
       .getOrElse(ExternalBlockStore.DEFAULT_BLOCK_MANAGER_NAME)

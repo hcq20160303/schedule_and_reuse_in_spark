@@ -55,16 +55,16 @@ private[spark] abstract class RpcEndpointRef(@transient conf: SparkConf)
 
   /**
    * Send a message to the corresponding [[RpcEndpoint.receiveAndReply)]] and return a [[Future]] to
-   * receive the reply within a default timeout.
+   * receive the reply within a default.conf timeout.
    *
    * This method only sends the message once and never retries.
    */
   def ask[T: ClassTag](message: Any): Future[T] = ask(message, defaultAskTimeout)
 
   /**
-   * Send a message to the corresponding [[RpcEndpoint]] and get its result within a default
-   * timeout, or throw a SparkException if this fails even after the default number of retries.
-   * The default `timeout` will be used in every trial of calling `sendWithReply`. Because this
+   * Send a message to the corresponding [[RpcEndpoint]] and get its result within a default.conf
+   * timeout, or throw a SparkException if this fails even after the default.conf number of retries.
+   * The default.conf `timeout` will be used in every trial of calling `sendWithReply`. Because this
    * method retries, the message handling in the receiver side should be idempotent.
    *
    * Note: this is a blocking action which may cost a lot of time,  so don't call it in an message

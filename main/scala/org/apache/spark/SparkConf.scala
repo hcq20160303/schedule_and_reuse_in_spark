@@ -193,7 +193,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
     getOption(key).getOrElse(throw new NoSuchElementException(key))
   }
 
-  /** Get a parameter, falling back to a default if not set */
+  /** Get a parameter, falling back to a default.conf if not set */
   def get(key: String, defaultValue: String): String = {
     getOption(key).getOrElse(defaultValue)
   }
@@ -208,7 +208,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   }
 
   /**
-   * Get a time parameter as seconds, falling back to a default if not set. If no
+   * Get a time parameter as seconds, falling back to a default.conf if not set. If no
    * suffix is provided then seconds are assumed.
    */
   def getTimeAsSeconds(key: String, defaultValue: String): Long = {
@@ -225,7 +225,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   }
 
   /**
-   * Get a time parameter as milliseconds, falling back to a default if not set. If no
+   * Get a time parameter as milliseconds, falling back to a default.conf if not set. If no
    * suffix is provided then milliseconds are assumed.
    */
   def getTimeAsMs(key: String, defaultValue: String): Long = {
@@ -242,7 +242,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   }
 
   /**
-   * Get a size parameter as bytes, falling back to a default if not set. If no
+   * Get a size parameter as bytes, falling back to a default.conf if not set. If no
    * suffix is provided then bytes are assumed.
    */
   def getSizeAsBytes(key: String, defaultValue: String): Long = {
@@ -250,7 +250,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   }
 
   /**
-   * Get a size parameter as bytes, falling back to a default if not set.
+   * Get a size parameter as bytes, falling back to a default.conf if not set.
    */
   def getSizeAsBytes(key: String, defaultValue: Long): Long = {
     Utils.byteStringAsBytes(get(key, defaultValue + "B"))
@@ -266,7 +266,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   }
 
   /**
-   * Get a size parameter as Kibibytes, falling back to a default if not set. If no
+   * Get a size parameter as Kibibytes, falling back to a default.conf if not set. If no
    * suffix is provided then Kibibytes are assumed.
    */
   def getSizeAsKb(key: String, defaultValue: String): Long = {
@@ -283,7 +283,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   }
 
   /**
-   * Get a size parameter as Mebibytes, falling back to a default if not set. If no
+   * Get a size parameter as Mebibytes, falling back to a default.conf if not set. If no
    * suffix is provided then Mebibytes are assumed.
    */
   def getSizeAsMb(key: String, defaultValue: String): Long = {
@@ -300,7 +300,7 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
   }
 
   /**
-   * Get a size parameter as Gibibytes, falling back to a default if not set. If no
+   * Get a size parameter as Gibibytes, falling back to a default.conf if not set. If no
    * suffix is provided then Gibibytes are assumed.
    */
   def getSizeAsGb(key: String, defaultValue: String): Long = {
@@ -317,22 +317,22 @@ class SparkConf(loadDefaults: Boolean) extends Cloneable with Logging {
     settings.entrySet().asScala.map(x => (x.getKey, x.getValue)).toArray
   }
 
-  /** Get a parameter as an integer, falling back to a default if not set */
+  /** Get a parameter as an integer, falling back to a default.conf if not set */
   def getInt(key: String, defaultValue: Int): Int = {
     getOption(key).map(_.toInt).getOrElse(defaultValue)
   }
 
-  /** Get a parameter as a long, falling back to a default if not set */
+  /** Get a parameter as a long, falling back to a default.conf if not set */
   def getLong(key: String, defaultValue: Long): Long = {
     getOption(key).map(_.toLong).getOrElse(defaultValue)
   }
 
-  /** Get a parameter as a double, falling back to a default if not set */
+  /** Get a parameter as a double, falling back to a default.conf if not set */
   def getDouble(key: String, defaultValue: Double): Double = {
     getOption(key).map(_.toDouble).getOrElse(defaultValue)
   }
 
-  /** Get a parameter as a boolean, falling back to a default if not set */
+  /** Get a parameter as a boolean, falling back to a default.conf if not set */
   def getBoolean(key: String, defaultValue: Boolean): Boolean = {
     getOption(key).map(_.toBoolean).getOrElse(defaultValue)
   }
@@ -523,7 +523,7 @@ private[spark] object SparkConf extends Logging {
       DeprecatedConfig("spark.yarn.user.classpath.first", "1.3",
         "Please use spark.{driver,executor}.userClassPathFirst instead."),
       DeprecatedConfig("spark.kryoserializer.buffer.mb", "1.4",
-        "Please use spark.kryoserializer.buffer instead. The default value for " +
+        "Please use spark.kryoserializer.buffer instead. The default.conf value for " +
           "spark.kryoserializer.buffer.mb was previously specified as '0.064'. Fractional values " +
           "are no longer accepted. To specify the equivalent now, one may use '64k'.")
     )

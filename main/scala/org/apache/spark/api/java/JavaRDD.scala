@@ -36,7 +36,7 @@ class JavaRDD[T](val rdd: RDD[T])(implicit val classTag: ClassTag[T])
 
   // Common RDD functions
 
-  /** Persist this RDD with the default storage level (`MEMORY_ONLY`). */
+  /** Persist this RDD with the default.conf storage level (`MEMORY_ONLY`). */
   def cache(): JavaRDD[T] = wrapRDD(rdd.cache())
 
   /**

@@ -27,7 +27,7 @@ import org.apache.spark.network.util.{TransportConf, ConfigProvider}
  */
 object SparkTransportConf {
   /**
-   * Specifies an upper bound on the number of Netty threads that Spark requires by default.
+   * Specifies an upper bound on the number of Netty threads that Spark requires by default.conf.
    * In practice, only 2-4 cores should be required to transfer roughly 10 Gb/s, and each core
    * that we use will have an initial overhead of roughly 32 MB of off-heap memory, which comes
    * at a premium.
@@ -62,7 +62,7 @@ object SparkTransportConf {
   }
 
   /**
-   * Returns the default number of threads for both the Netty client and server thread pools.
+   * Returns the default.conf number of threads for both the Netty client and server thread pools.
    * If numUsableCores is 0, we will use Runtime get an approximate number of available cores.
    */
   private def defaultNumThreads(numUsableCores: Int): Int = {

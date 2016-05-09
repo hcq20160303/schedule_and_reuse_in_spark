@@ -112,7 +112,7 @@ trait Logging {
 
   private def initializeLogging() {
     // Don't use a logger in here, as this is itself occurring during initialization of a logger
-    // If Log4j 1.2 is being used, but is not initialized, load a default properties file
+    // If Log4j 1.2 is being used, but is not initialized, load a default.conf properties file
     val binderClass = StaticLoggerBinder.getSingleton.getLoggerFactoryClassStr
     // This distinguishes the log4j 1.2 binding, currently
     // org.slf4j.impl.Log4jLoggerFactory, from the log4j 2.0 binding, currently
@@ -137,7 +137,7 @@ trait Logging {
           Option(Utils.getSparkClassLoader.getResource(defaultLogProps)) match {
             case Some(url) =>
               PropertyConfigurator.configure(url)
-              System.err.println(s"Using Spark's default log4j profile: $defaultLogProps")
+              System.err.println(s"Using Spark's default.conf log4j profile: $defaultLogProps")
             case None =>
               System.err.println(s"Spark was unable to load $defaultLogProps")
           }

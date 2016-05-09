@@ -105,8 +105,8 @@ class SparkContextSchedulerCreationSuite
     assert(e.getMessage.contains("Could not parse Master URL"))
   }
 
-  test("local-default-parallelism") {
-    val conf = new SparkConf().set("spark.default.parallelism", "16")
+  test("local-default.conf-parallelism") {
+    val conf = new SparkConf().set("spark.default.conf.parallelism", "16")
     val sched = createTaskScheduler("local", conf)
 
     sched.backend match {

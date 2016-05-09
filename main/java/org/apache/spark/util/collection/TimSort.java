@@ -203,7 +203,7 @@ class TimSort<K, Buffer> {
        * Slide elements over to make room for pivot.
        */
       int n = start - left;  // The number of elements to move
-      // Switch is just an optimization for arraycopy in default case
+      // Switch is just an optimization for arraycopy in default.conf case
       switch (n) {
         case 2:  s.copyElement(a, left + 1, a, left + 2);
         case 1:  s.copyElement(a, left, a, left + 1);

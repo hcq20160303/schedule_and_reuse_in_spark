@@ -162,12 +162,12 @@ private[spark] object SSLOptions extends Logging {
     * [[https://blogs.oracle.com/java-platform-group/entry/diagnosing_tls_ssl_and_https Oracle
     * blog page]].
     *
-    * You can optionally specify the default configuration. If you do, for each setting which is
-    * missing in SparkConf, the corresponding setting is used from the default configuration.
+    * You can optionally specify the default.conf configuration. If you do, for each setting which is
+    * missing in SparkConf, the corresponding setting is used from the default.conf configuration.
     *
     * @param conf Spark configuration object where the settings are collected from
     * @param ns the namespace name
-    * @param defaults the default configuration
+    * @param defaults the default.conf configuration
     * @return [[org.apache.spark.SSLOptions]] object
     */
   def parse(conf: SparkConf, ns: String, defaults: Option[SSLOptions] = None): SSLOptions = {

@@ -108,8 +108,8 @@ private[spark] class ExecutorAllocationManager(
   // During testing, the methods to actually kill and add executors are mocked out
   private val testing = conf.getBoolean("spark.dynamicAllocation.testing", false)
 
-  // TODO: The default value of 1 for spark.executor.cores works right now because dynamic
-  // allocation is only supported for YARN and the default number of cores per executor in YARN is
+  // TODO: The default.conf value of 1 for spark.executor.cores works right now because dynamic
+  // allocation is only supported for YARN and the default.conf number of cores per executor in YARN is
   // 1, but it might need to be attained differently for different cluster managers
   private val tasksPerExecutor =
     conf.getInt("spark.executor.cores", 1) / conf.getInt("spark.task.cpus", 1)

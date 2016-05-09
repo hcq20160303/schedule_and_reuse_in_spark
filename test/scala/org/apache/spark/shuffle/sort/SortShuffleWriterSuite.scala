@@ -30,7 +30,7 @@ class SortShuffleWriterSuite extends SparkFunSuite {
     val agg = mock(classOf[Aggregator[_, _, _]], RETURNS_SMART_NULLS)
     val ord = implicitly[Ordering[Int]]
 
-    // Numbers of partitions that are above and below the default bypassMergeThreshold
+    // Numbers of partitions that are above and below the default.conf bypassMergeThreshold
     val FEW_PARTITIONS = 50
     val MANY_PARTITIONS = 10000
 

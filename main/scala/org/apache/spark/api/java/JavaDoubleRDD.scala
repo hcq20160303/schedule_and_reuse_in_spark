@@ -46,7 +46,7 @@ class JavaDoubleRDD(val srdd: RDD[scala.Double])
 
   import JavaDoubleRDD.fromRDD
 
-  /** Persist this RDD with the default storage level (`MEMORY_ONLY`). */
+  /** Persist this RDD with the default.conf storage level (`MEMORY_ONLY`). */
   def cache(): JavaDoubleRDD = fromRDD(srdd.cache())
 
   /**
@@ -165,14 +165,14 @@ class JavaDoubleRDD(val srdd: RDD[scala.Double])
 
   /**
    * Returns the minimum element from this RDD as defined by
-   * the default comparator natural order.
+   * the default.conf comparator natural order.
    * @return the minimum of the RDD
    */
   def min(): JDouble = min(com.google.common.collect.Ordering.natural())
 
   /**
    * Returns the maximum element from this RDD as defined by
-   * the default comparator natural order.
+   * the default.conf comparator natural order.
    * @return the maximum of the RDD
    */
   def max(): JDouble = max(com.google.common.collect.Ordering.natural())

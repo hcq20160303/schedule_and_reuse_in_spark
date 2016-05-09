@@ -348,7 +348,7 @@ class JavaSparkContext(val sc: SparkContext)
    * Load an RDD saved as a SequenceFile containing serialized objects, with NullWritable keys and
    * BytesWritable values that contain a serialized partition. This is still an experimental storage
    * format and may not be supported exactly as is in future Spark releases. It will also be pretty
-   * slow if you use the default serializer (Java serialization), though the nice thing about it is
+   * slow if you use the default.conf serializer (Java serialization), though the nice thing about it is
    * that there's very little effort required to save arbitrary objects.
    */
   def objectFile[T](path: String, minPartitions: Int): JavaRDD[T] = {
@@ -360,7 +360,7 @@ class JavaSparkContext(val sc: SparkContext)
    * Load an RDD saved as a SequenceFile containing serialized objects, with NullWritable keys and
    * BytesWritable values that contain a serialized partition. This is still an experimental storage
    * format and may not be supported exactly as is in future Spark releases. It will also be pretty
-   * slow if you use the default serializer (Java serialization), though the nice thing about it is
+   * slow if you use the default.conf serializer (Java serialization), though the nice thing about it is
    * that there's very little effort required to save arbitrary objects.
    */
   def objectFile[T](path: String): JavaRDD[T] = {
@@ -784,7 +784,7 @@ class JavaSparkContext(val sc: SparkContext)
    *
    * If interruptOnCancel is set to true for the job group, then job cancellation will result
    * in Thread.interrupt() being called on the job's executor threads. This is useful to help ensure
-   * that the tasks are actually stopped in a timely manner, but is off by default due to HDFS-1208,
+   * that the tasks are actually stopped in a timely manner, but is off by default.conf due to HDFS-1208,
    * where HDFS may respond to Thread.interrupt() by marking nodes as dead.
    */
   def setJobGroup(groupId: String, description: String, interruptOnCancel: Boolean): Unit =

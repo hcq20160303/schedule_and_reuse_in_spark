@@ -187,7 +187,7 @@ class SparkContextSuite extends SparkFunSuite with LocalSparkContext {
     }
   }
 
-  test("addFile recursive can't add directories by default") {
+  test("addFile recursive can't add directories by default.conf") {
     val dir = Utils.createTempDir()
 
     try {

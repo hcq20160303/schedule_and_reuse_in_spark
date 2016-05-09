@@ -66,7 +66,7 @@ private[spark] object Utils extends Logging {
   val random = new Random()
 
   /**
-   * Define a default value for driver memory here since this value is referenced across the code
+   * Define a default.conf value for driver memory here since this value is referenced across the code
    * base and nearly all files already use Utils.scala
    */
   val DEFAULT_DRIVER_MEM_MB = JavaUtils.DEFAULT_DRIVER_MEM_MB.toInt
@@ -240,7 +240,7 @@ private[spark] object Utils extends Logging {
   }
 
   /** Copy all data from an InputStream to an OutputStream. NIO way of file stream to file stream
-    * copying is disabled by default unless explicitly set transferToEnabled as true,
+    * copying is disabled by default.conf unless explicitly set transferToEnabled as true,
     * the parameter transferToEnabled should be configured by spark.file.transferTo = [true|false].
     */
   def copyStream(in: InputStream,
@@ -302,7 +302,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Construct a URI container information used for authentication.
-   * This also sets the default authenticator to properly negotiation the
+   * This also sets the default.conf authenticator to properly negotiation the
    * user/password based on the URI.
    *
    * Note this relies on the Authenticator.setDefault being set properly to decode
@@ -380,7 +380,7 @@ private[spark] object Utils extends Logging {
     // Make the file executable - That's necessary for scripts
     FileUtil.chmod(targetFile.getAbsolutePath, "a+x")
 
-    // Windows does not grant read permission by default to non-admin users
+    // Windows does not grant read permission by default.conf to non-admin users
     // Add read permission to owner explicitly
     if (isWindows) {
       FileUtil.chmod(targetFile.getAbsolutePath, "u+r")
@@ -1110,7 +1110,7 @@ private[spark] object Utils extends Logging {
 
   /**
    * Execute a block of code that evaluates to Unit, forwarding any uncaught exceptions to the
-   * default UncaughtExceptionHandler
+   * default.conf UncaughtExceptionHandler
    *
    * NOTE: This method is to be called by the spark-started JVM process.
    */
@@ -1495,7 +1495,7 @@ private[spark] object Utils extends Logging {
   }
 
   /** Returns the system properties map that is thread-safe to iterator over. It gets the
-    * properties which have been set explicitly, as well as those for which only a default value
+    * properties which have been set explicitly, as well as those for which only a default.conf value
     * has been defined. */
   def getSystemProperties: Map[String, String] = {
     val sysProps = for (key <- System.getProperties.stringPropertyNames()) yield
@@ -1784,7 +1784,7 @@ private[spark] object Utils extends Logging {
   }
 
   /**
-   * Load default Spark properties from the given file. If no file is provided,
+   * Load default.conf Spark properties from the given file. If no file is provided,
    * use the common defaults file. This mutates state in the given SparkConf and
    * in this JVM's system properties if the config specified in the file is not
    * already set. Return the path of the properties file used.
@@ -1821,7 +1821,7 @@ private[spark] object Utils extends Logging {
     }
   }
 
-  /** Return the path of the default Spark properties file. */
+  /** Return the path of the default.conf Spark properties file. */
   def getDefaultPropertiesFile(env: Map[String, String] = sys.env): String = {
     env.get("SPARK_CONF_DIR")
       .orElse(env.get("SPARK_HOME").map { t => s"$t${File.separator}conf" })
@@ -1993,7 +1993,7 @@ private[spark] object Utils extends Logging {
     method.invoke(obj, values.toSeq: _*)
   }
 
-  // Limit of bytes for total size of results (default is 1GB)
+  // Limit of bytes for total size of results (default.conf is 1GB)
   def getMaxResultSize(conf: SparkConf): Long = {
     memoryStringToMb(conf.get("spark.driver.maxResultSize", "1g")).toLong << 20
   }
@@ -2137,7 +2137,7 @@ private[spark] object Utils extends Logging {
   /**
    * Return whether dynamic allocation is enabled in the given conf
    * Dynamic allocation and explicitly setting the number of executors are inherently
-   * incompatible. In environments where dynamic allocation is turned on by default,
+   * incompatible. In environments where dynamic allocation is turned on by default.conf,
    * the latter should override the former (SPARK-9092).
    */
   def isDynamicAllocationEnabled(conf: SparkConf): Boolean = {
@@ -2179,7 +2179,7 @@ private[spark] class RedirectThread(
 }
 
 /**
- * An [[OutputStream]] that will store the last 10 kilobytes (by default) written to it
+ * An [[OutputStream]] that will store the last 10 kilobytes (by default.conf) written to it
  * in a circular buffer. The current contents of the buffer can be accessed using
  * the toString method.
  */

@@ -85,7 +85,7 @@ object RandomSampler {
  *
  * @param lb lower bound of the acceptance range
  * @param ub upper bound of the acceptance range
- * @param complement whether to use the complement of the range specified, default to false
+ * @param complement whether to use the complement of the range specified, default.conf to false
  * @tparam T item type
  */
 @DeveloperApi

@@ -1,6 +1,6 @@
 package rddShare.tool
 
-import java.io.InputStream
+import java.io._
 
 import rddShare.main.RDDShare
 
@@ -13,13 +13,14 @@ import scala.sys.process.Process
 object MyUtils {
   def getFunctionOfRDD(input: InputStream, funClassPath: String): String ={
     var function = ""
-    val pathOfFunctionClass = RDDShare.getBasePath+funClassPath+".class"
+    val pathOfFunctionJava = RDDShare.getAnnoFunctionCopyPath+funClassPath+".class"
     // copy the .class file to pathOfFunctionClass
-    MyFileIO.fileWriteBytes(pathOfFunctionClass, MyFileIO.fileReadBytes(input))
+    MyFileIO.fileWriteBytes(pathOfFunctionJava, MyFileIO.fileReadBytes(input))
     // recomplie the .class file to .java file use jad
-    Process("jad ").!
+    val command = "jad -sjava " + pathOfFunctionJava
+    Process(command).!
 
-    val pathOfJavaFile = pathOfFunctionClass.split(".cla")(0) + ".java"
+    val pathOfJavaFile = pathOfFunctionJava.split(".cla")(0) + ".java"
     val sources = Source.fromFile(pathOfJavaFile).getLines().toIterator
     var findApply = false
     while ( sources.hasNext ){
@@ -33,4 +34,20 @@ object MyUtils {
     }
     function
   }
+
+  def serialize[T](o: T): Array[Byte] = {
+    val bos = new ByteArrayOutputStream()
+    val oos = new ObjectOutputStream(bos)
+    oos.writeObject(o)
+    oos.close()
+    bos.toByteArray
+  }
+
+  /** Deserialize an object using Java serialization */
+  def deserialize[T](bytes: Array[Byte]): T = {
+    val bis = new ByteArrayInputStream(bytes)
+    val ois = new ObjectInputStream(bis)
+    ois.readObject.asInstanceOf[T]
+  }
+
 }

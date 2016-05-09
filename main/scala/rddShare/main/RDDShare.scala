@@ -2,9 +2,12 @@ package rddShare.main
 
 //import java.util._
 
+import java.io.{File, FileInputStream, ObjectInputStream}
+import java.nio.file.{Files, Paths}
 import java.util
 import java.util.{ArrayList, Comparator, HashMap, TreeSet}
 
+import com.typesafe.config.ConfigFactory
 import org.apache.spark.rdd.RDD
 
 import scala.io.Source
@@ -88,7 +91,7 @@ class RDDShare(private val finalRDD: RDD[_]) {
       if ( RDDShare.CACHE_TRANSFORMATION.contains(node.transformation) && !node.realRDD.fromCache){
           node.realRDD.isCache = true
 
-          val cachePath = RDDShare.basePath + node.realRDD.sparkContext.hashCode()+ "/" +
+          val cachePath = RDDShare.repositoryBasePath + node.realRDD.sparkContext.hashCode()+ "/" +
             node.realRDD.transformation + "["+node.realRDD.id+"]"
           node.realRDD.cache()
           node.realRDD.saveAsObjectFile(cachePath)
@@ -104,82 +107,40 @@ class RDDShare(private val finalRDD: RDD[_]) {
     }
   }
 
-  /**
-   * 缓存管理函数：该函数完成缓存的管理工作，当出现以下情况之一触发该操作：
-   * 1. replace
-   * * 1） 缓存总大小超过设定阈值；
-   * * 2） 缓存超过设定时间未更新；
-   * 2. maintain consistency
-   * * 1) 缓存中的某个DAG的输入被删除或者被修改。
-   */
-  def cacheManage(manageType: String, needCacheSize: Double, deleteData: String = null): Unit = {
-    manageType match {
-      case "replace" => {
-        /**
-         * replace algrothom
-         * 1. "use" less, replace first
-         * 2. if "use" equal, then more "exeTimeOfDag", replace first
-         */
-        val repo = RDDShare.repository.toArray.asInstanceOf[Array[CacheMetaData]]
-                                      .sortWith( (x: CacheMetaData, y: CacheMetaData) => (x.use < y.use && x.exeTimeOfDag > y.exeTimeOfDag) ).iterator
-        var find = false
-        var needCacheSizeCopy = needCacheSize
-        while( repo.hasNext && !find ){
-          val cache = repo.next()
-          if ( cache.sizoOfOutputData >= needCacheSizeCopy ){
-            find = true
-          }else{
-            needCacheSizeCopy -= cache.sizoOfOutputData
-          }
-          /**
-           * remove need to syn
-           */
-          RDDShare.synchronized(RDDShare.repository.remove(cache))
-        }
-      }
-
-      case "consistency" => {
-        /**
-         * maintain consistency
-         */
-      }
-    }
-  }
-
 }
 
 object RDDShare{
 
-  def main(args: Array[String]): Unit ={
-  }
+  val sparkCorePath = getClass.getResource("").getPath.split("target")(0)
+  val resourcesPath = sparkCorePath + "src/main/resources/rddShare/"
+  val conf = ConfigFactory.parseFile(new File(resourcesPath + "default.conf"))
+  private val repositoryBasePath: String = conf.getString("rddShare.repositoryBasePath")
+  def getRepositoryBasePath = repositoryBasePath
 
-  private var basePath: String = null
-  def getBasePath = basePath
+  def getAnnoFunctionCopyPath = conf.getString("rddShare.annoFunctionCopyPath")
 
-  private var CACHE_TRANSFORMATION: Predef.Set[String] = null
-  private var cacheSize: Double = 0
+  // a RDD which execute a transformation in CACHE_TRANSFORMATION will be chosen to
+  // store in repostory, and reuse by other application
+  private val CACHE_TRANSFORMATION: Predef.Set[String] =
+    conf.getString("rddShare.cacheTransformation").split(" ").toSet
 
-  def init(): Unit ={
-    val conf = Source.fromFile("../../../resources/rddShare/default").getLines().toArray
-    basePath = conf(0).split("=")(1)
-    CACHE_TRANSFORMATION = conf(1).split("=")(1).split(" ").toSet
-    cacheSize = conf(2).split("=")(1).toDouble
-  }
+  // the max space size in repository, if beyond this size,
+  // it will trigger the RDDShare.cacheManager method
+  private val repositorySize: Double = conf.getString("rddShare.repositorySize").split("g")(0).toDouble
 
-  private val TRANSFORMATION_PRIORITY: HashMap[String, Integer] = initTRANSFORMATION_PRIORITY()
-
-  private def initTRANSFORMATION_PRIORITY(): HashMap[String, Integer] = {
+  // this used by repository to sort the cacheMetaDatas
+  private val TRANSFORMATION_PRIORITY: HashMap[String, Integer] = {
 
     val tranformtion_priority = new HashMap[String, Integer]
 
-    val jsonLines = Source.fromFile("../../../resources/rddShare/transformation.json").getLines()
+    val jsonLines = Source.fromFile(resourcesPath + "transformation.json").getLines()
     jsonLines.foreach( line => {
       val transformationAndPriority = JSON.parseFull(line)
       transformationAndPriority match {
         case Some(m: Map[String, Any]) => {
           tranformtion_priority.put(
             m.get("transformation") match { case Some(tran: Any) => tran.toString },
-            m.get("priority")       match { case Some(pri: Any) => pri.asInstanceOf[Int] }
+            m.get("priority")       match { case Some(pri: Any) => pri.asInstanceOf[Double].toInt }
           )
         }
       }}
@@ -187,6 +148,7 @@ object RDDShare{
 
     tranformtion_priority
   }
+  def tranformtion_priority = TRANSFORMATION_PRIORITY
 
   private val repository: TreeSet[CacheMetaData] = new TreeSet[CacheMetaData](new Comparator[CacheMetaData]() {
     /**
@@ -234,6 +196,15 @@ object RDDShare{
       }
     }
   })
+  {
+    // load the history cacheMetaData to repository from disk if rddShare system has the history data
+    if (Files.exists(Paths.get(resourcesPath+"repository"))){
+      val input = new ObjectInputStream(new FileInputStream(resourcesPath+"repository"))
+      val repo = input.readObject().asInstanceOf[TreeSet[CacheMetaData]]
+      repository.addAll(repo)
+    }
+  }
+  def getRepository = repository
 
   /**
    * 将指定的DAG图按深度遍历的顺序得到DAG图中的各个节点
@@ -279,6 +250,47 @@ object RDDShare{
     }
   }
 
+  /**
+   * 缓存管理函数：该函数完成缓存的管理工作，当出现以下情况之一触发该操作：
+   * 1. replace
+   * * 1） 缓存总大小超过设定阈值；
+   * * 2） 缓存超过设定时间未更新；
+   * 2. maintain consistency
+   * * 1) 缓存中的某个DAG的输入被删除或者被修改。
+   */
+  def cacheManage(manageType: String, needCacheSize: Double, deleteData: String = null): Unit = {
+    manageType match {
+      case "replace" => {
+        /**
+         * replace algrothom
+         * 1. "use" less, replace first
+         * 2. if "use" equal, then more "exeTimeOfDag", replace first
+         */
+        val repo = RDDShare.repository.toArray.asInstanceOf[Array[CacheMetaData]]
+          .sortWith( (x: CacheMetaData, y: CacheMetaData) => (x.use < y.use && x.exeTimeOfDag > y.exeTimeOfDag) ).iterator
+        var find = false
+        var needCacheSizeCopy = needCacheSize
+        while( repo.hasNext && !find ){
+          val cache = repo.next()
+          if ( cache.sizoOfOutputData >= needCacheSizeCopy ){
+            find = true
+          }else{
+            needCacheSizeCopy -= cache.sizoOfOutputData
+          }
+          /**
+           * remove need to syn
+           */
+          RDDShare.synchronized(RDDShare.repository.remove(cache))
+        }
+      }
+
+      case "consistency" => {
+        /**
+         * maintain consistency
+         */
+      }
+    }
+  }
 }
 
 

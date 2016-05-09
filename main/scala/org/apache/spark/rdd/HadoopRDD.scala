@@ -149,7 +149,7 @@ class HadoopRDD[K, V](
       // solution, implemented here, is to clone the Configuration object.  Unfortunately, this
       // clone can be very expensive.  To avoid unexpected performance regressions for workloads and
       // Hadoop versions that do not suffer from these thread-safety issues, this cloning is
-      // disabled by default.
+      // disabled by default.conf.
       HadoopRDD.CONFIGURATION_INSTANTIATION_LOCK.synchronized {
         logDebug("Cloning Hadoop Configuration")
         val newJobConf = new JobConf(conf)

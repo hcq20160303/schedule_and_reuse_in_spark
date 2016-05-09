@@ -93,10 +93,10 @@ private[spark] object MetadataCleaner {
   }
 
   /**
-   * Set the default delay time (in seconds).
+   * Set the default.conf delay time (in seconds).
    * @param conf SparkConf instance
-   * @param delay default delay time to set
-   * @param resetAll whether to reset all to default
+   * @param delay default.conf delay time to set
+   * @param resetAll whether to reset all to default.conf
    */
   def setDelaySeconds(conf: SparkConf, delay: Int, resetAll: Boolean = true) {
     conf.set("spark.cleaner.ttl", delay.toString)

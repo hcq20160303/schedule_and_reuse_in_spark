@@ -67,7 +67,7 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
   test("create repo resolvers") {
     val settings = new IvySettings
     val res1 = SparkSubmitUtils.createRepoResolvers(None, settings)
-    // should have central and spark-packages by default
+    // should have central and spark-packages by default.conf
     assert(res1.getResolvers.size() === 4)
     assert(res1.getResolvers.get(0).asInstanceOf[IBiblioResolver].getName === "local-m2-cache")
     assert(res1.getResolvers.get(1).asInstanceOf[FileSystemResolver].getName === "local-ivy-cache")
@@ -91,7 +91,7 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
     val artifacts = SparkSubmitUtils.extractMavenCoordinates("com.databricks:spark-csv_2.10:0.1," +
       "com.databricks:spark-avro_2.10:0.1")
 
-    SparkSubmitUtils.addDependenciesToIvy(md, artifacts, "default")
+    SparkSubmitUtils.addDependenciesToIvy(md, artifacts, "default.conf")
     assert(md.getDependencies.length === 2)
   }
 
@@ -99,7 +99,7 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
     val md = SparkSubmitUtils.getModuleDescriptor
     val excludes = Seq("a:b", "c:d")
     excludes.foreach { e =>
-      md.addExcludeRule(SparkSubmitUtils.createExclusion(e + ":*", new IvySettings, "default"))
+      md.addExcludeRule(SparkSubmitUtils.createExclusion(e + ":*", new IvySettings, "default.conf"))
     }
     val rules = md.getAllExcludeRules
     assert(rules.length === 2)
@@ -110,7 +110,7 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
     assert(rule2.getOrganisation === "c")
     assert(rule2.getName === "d")
     intercept[IllegalArgumentException] {
-      SparkSubmitUtils.createExclusion("e:f:g:h", new IvySettings, "default")
+      SparkSubmitUtils.createExclusion("e:f:g:h", new IvySettings, "default.conf")
     }
   }
 
@@ -128,7 +128,7 @@ class SparkSubmitUtilsSuite extends SparkFunSuite with BeforeAndAfterAll {
       // end to end
       val jarPath = SparkSubmitUtils.resolveMavenCoordinates(main.toString, Option(repo),
         Option(tempIvyPath), isTest = true)
-      assert(jarPath.indexOf(tempIvyPath) >= 0, "should use non-default ivy path")
+      assert(jarPath.indexOf(tempIvyPath) >= 0, "should use non-default.conf ivy path")
     }
   }
 

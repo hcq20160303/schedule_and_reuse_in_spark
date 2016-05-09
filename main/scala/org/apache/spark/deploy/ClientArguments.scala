@@ -106,10 +106,10 @@ private[deploy] class ClientArguments(args: Array[String]) {
       |Usage: DriverClient kill <active-master> <driver-id>
       |
       |Options:
-      |   -c CORES, --cores CORES        Number of cores to request (default: $DEFAULT_CORES)
-      |   -m MEMORY, --memory MEMORY     Megabytes of memory to request (default: $DEFAULT_MEMORY)
+      |   -c CORES, --cores CORES        Number of cores to request (default.conf: $DEFAULT_CORES)
+      |   -m MEMORY, --memory MEMORY     Megabytes of memory to request (default.conf: $DEFAULT_MEMORY)
       |   -s, --supervise                Whether to restart the driver on failure
-      |                                  (default: $DEFAULT_SUPERVISE)
+      |                                  (default.conf: $DEFAULT_SUPERVISE)
       |   -v, --verbose                  Print more debugging output
      """.stripMargin
     // scalastyle:off println

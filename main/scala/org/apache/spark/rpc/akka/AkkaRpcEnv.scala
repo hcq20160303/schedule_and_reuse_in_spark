@@ -51,7 +51,7 @@ private[spark] class AkkaRpcEnv private[akka] (
   private val defaultAddress: RpcAddress = {
     val address = actorSystem.asInstanceOf[ExtendedActorSystem].provider.getDefaultAddress
     // In some test case, ActorSystem doesn't bind to any address.
-    // So just use some default value since they are only some unit tests
+    // So just use some default.conf value since they are only some unit tests
     RpcAddress(address.host.getOrElse("localhost"), address.port.getOrElse(boundPort))
   }
 

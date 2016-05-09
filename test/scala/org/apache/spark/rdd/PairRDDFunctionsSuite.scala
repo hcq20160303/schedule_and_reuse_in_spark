@@ -420,7 +420,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     assert(rdd.values.collect().toList === List("a", "b"))
   }
 
-  test("default partitioner uses partition size") {
+  test("default.conf partitioner uses partition size") {
     // specify 2000 partitions
     val a = sc.makeRDD(Array(1, 2, 3, 4), 2000)
     // do a map, which loses the partitioner
@@ -430,7 +430,7 @@ class PairRDDFunctionsSuite extends SparkFunSuite with SharedSparkContext {
     assert(c.partitions.size === 2000)
   }
 
-  test("default partitioner uses largest partitioner") {
+  test("default.conf partitioner uses largest partitioner") {
     val a = sc.makeRDD(Array((1, "a"), (2, "b")), 2)
     val b = sc.makeRDD(Array((1, "a"), (2, "b")), 2000)
     val c = a.join(b)

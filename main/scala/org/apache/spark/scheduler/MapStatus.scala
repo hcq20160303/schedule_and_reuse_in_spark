@@ -137,7 +137,7 @@ private[spark] class HighlyCompressedMapStatus private (
     private[this] var avgSize: Long)
   extends MapStatus with Externalizable {
 
-  // loc could be null when the default constructor is called during deserialization
+  // loc could be null when the default.conf constructor is called during deserialization
   require(loc == null || avgSize > 0 || numNonEmptyBlocks == 0,
     "Average size can only be zero for map stages that produced no output")
 

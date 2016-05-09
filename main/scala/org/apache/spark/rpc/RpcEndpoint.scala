@@ -96,7 +96,7 @@ private[spark] trait RpcEndpoint {
    * Invoked when any exception is thrown during handling messages.
    */
   def onError(cause: Throwable): Unit = {
-    // By default, throw e and let RpcEnv handle it
+    // By default.conf, throw e and let RpcEnv handle it
     throw cause
   }
 
@@ -104,28 +104,28 @@ private[spark] trait RpcEndpoint {
    * Invoked before [[RpcEndpoint]] starts to handle any message.
    */
   def onStart(): Unit = {
-    // By default, do nothing.
+    // By default.conf, do nothing.
   }
 
   /**
    * Invoked when [[RpcEndpoint]] is stopping.
    */
   def onStop(): Unit = {
-    // By default, do nothing.
+    // By default.conf, do nothing.
   }
 
   /**
    * Invoked when `remoteAddress` is connected to the current node.
    */
   def onConnected(remoteAddress: RpcAddress): Unit = {
-    // By default, do nothing.
+    // By default.conf, do nothing.
   }
 
   /**
    * Invoked when `remoteAddress` is lost.
    */
   def onDisconnected(remoteAddress: RpcAddress): Unit = {
-    // By default, do nothing.
+    // By default.conf, do nothing.
   }
 
   /**
@@ -133,7 +133,7 @@ private[spark] trait RpcEndpoint {
    * `remoteAddress`.
    */
   def onNetworkError(cause: Throwable, remoteAddress: RpcAddress): Unit = {
-    // By default, do nothing.
+    // By default.conf, do nothing.
   }
 
   /**

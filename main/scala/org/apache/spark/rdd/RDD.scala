@@ -188,10 +188,10 @@ abstract class RDD[T: ClassTag](
     }
   }
 
-  /** Persist this RDD with the default storage level (`MEMORY_ONLY`). */
+  /** Persist this RDD with the default.conf storage level (`MEMORY_ONLY`). */
   def persist(): this.type = persist(StorageLevel.MEMORY_ONLY)
 
-  /** Persist this RDD with the default storage level (`MEMORY_ONLY`). */
+  /** Persist this RDD with the default.conf storage level (`MEMORY_ONLY`). */
   def cache(): this.type = persist()
 
   /**
@@ -316,10 +316,10 @@ abstract class RDD[T: ClassTag](
     val cleanF = sc.clean(f)
     val mapRDD = new MapPartitionsRDD[U, T](this, (context, pid, iter) => iter.map(cleanF))
     mapRDD.transformation = "map"
-//    val input = f.getClass.getResourceAsStream(f.getClass.toString)
-//    if ( !(this.transformation.equals("textFile") || this.transformation.equals("objectFile") )){
-//      mapRDD.function = MyUtils.getFunctionOfRDD(input, _sc.hashCode() + "/" + f.getClass.toString)
-//    }
+    val input = f.getClass.getResourceAsStream(f.getClass.toString)
+    if ( !(this.transformation.equals("textFile") || this.transformation.equals("objectFile") )){
+      mapRDD.function = MyUtils.getFunctionOfRDD(input, _sc.hashCode() + "/" + f.getClass.toString)
+    }
     mapRDD
   }
 
@@ -1026,7 +1026,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Reduces the elements of this RDD in a multi-level tree pattern.
    *
-   * @param depth suggested depth of the tree (default: 2)
+   * @param depth suggested depth of the tree (default.conf: 2)
    * @see [[org.apache.spark.rdd.RDD#reduce]]
    */
   def treeReduce(f: (T, T) => T, depth: Int = 2): T = withScope {
@@ -1100,7 +1100,7 @@ abstract class RDD[T: ClassTag](
   /**
    * Aggregates the elements of this RDD in a multi-level tree pattern.
    *
-   * @param depth suggested depth of the tree (default: 2)
+   * @param depth suggested depth of the tree (default.conf: 2)
    * @see [[org.apache.spark.rdd.RDD#aggregate]]
    */
   def treeAggregate[U: ClassTag](zeroValue: U)(
@@ -1424,7 +1424,7 @@ abstract class RDD[T: ClassTag](
     // https://issues.apache.org/jira/browse/SPARK-2075
     //
     // NullWritable is a `Comparable` in Hadoop 1.+, so the compiler cannot find an implicit
-    // Ordering for it and will use the default `null`. However, it's a `Comparable[NullWritable]`
+    // Ordering for it and will use the default.conf `null`. However, it's a `Comparable[NullWritable]`
     // in Hadoop 2.+, so the compiler will call the implicit `Ordering.ordered` method to create an
     // Ordering for `NullWritable`. That's why the compiler will generate different anonymous
     // classes for `saveAsTextFile` in Hadoop 1.+ and Hadoop 2.+.

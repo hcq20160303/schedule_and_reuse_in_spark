@@ -111,7 +111,7 @@ private[spark] object AkkaUtils extends Logging {
       |akka.remote.netty.tcp.connection-timeout = $akkaTimeoutS s
       |akka.remote.netty.tcp.maximum-frame-size = ${akkaFrameSize}B
       |akka.remote.netty.tcp.execution-pool-size = $akkaThreads
-      |akka.actor.default-dispatcher.throughput = $akkaBatchSize
+      |akka.actor.default.conf-dispatcher.throughput = $akkaBatchSize
       |akka.log-config-on-start = $logAkkaConfig
       |akka.remote.log-remote-lifecycle-events = $lifecycleEvents
       |akka.log-dead-letters = $lifecycleEvents
@@ -140,7 +140,7 @@ private[spark] object AkkaUtils extends Logging {
   val reservedSizeBytes = 200 * 1024
 
   /**
-   * Send a message to the given actor and get its result within a default timeout, or
+   * Send a message to the given actor and get its result within a default.conf timeout, or
    * throw a SparkException if this fails.
    */
   def askWithReply[T](
@@ -151,7 +151,7 @@ private[spark] object AkkaUtils extends Logging {
   }
 
   /**
-   * Send a message to the given actor and get its result within a default timeout, or
+   * Send a message to the given actor and get its result within a default.conf timeout, or
    * throw a SparkException if this fails even after the specified number of retries.
    */
   def askWithReply[T](

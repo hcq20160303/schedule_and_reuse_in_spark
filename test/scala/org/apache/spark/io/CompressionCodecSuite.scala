@@ -44,7 +44,7 @@ class CompressionCodecSuite extends SparkFunSuite {
     in.close()
   }
 
-  test("default compression codec") {
+  test("default.conf compression codec") {
     val codec = CompressionCodec.createCodec(conf)
     assert(codec.getClass === classOf[SnappyCompressionCodec])
     testCodec(codec)

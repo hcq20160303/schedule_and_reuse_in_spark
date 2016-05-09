@@ -553,12 +553,12 @@ private[deploy] class Master(
    * There are two modes of launching executors. The first attempts to spread out an application's
    * executors on as many workers as possible, while the second does the opposite (i.e. launch them
    * on as few workers as possible). The former is usually better for data locality purposes and is
-   * the default.
+   * the default.conf.
    *
    * The number of cores assigned to each executor is configurable. When this is explicitly set,
    * multiple executors from the same application may be launched on the same worker if the worker
    * has enough cores and memory. Otherwise, each executor grabs all the cores available on the
-   * worker by default, in which case only one executor may be launched on each worker.
+   * worker by default.conf, in which case only one executor may be launched on each worker.
    *
    * It is important to allocate coresPerExecutor on each worker at a time (instead of 1 core
    * at a time). Consider the following example: cluster has 4 workers with 16 cores each.

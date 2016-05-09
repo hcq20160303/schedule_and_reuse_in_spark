@@ -38,8 +38,8 @@ class MetricsSystemSuite extends SparkFunSuite with BeforeAndAfter with PrivateM
     securityMgr = new SecurityManager(conf)
   }
 
-  test("MetricsSystem with default config") {
-    val metricsSystem = MetricsSystem.createMetricsSystem("default", conf, securityMgr)
+  test("MetricsSystem with default.conf config") {
+    val metricsSystem = MetricsSystem.createMetricsSystem("default.conf", conf, securityMgr)
     metricsSystem.start()
     val sources = PrivateMethod[ArrayBuffer[Source]]('sources)
     val sinks = PrivateMethod[ArrayBuffer[Source]]('sinks)

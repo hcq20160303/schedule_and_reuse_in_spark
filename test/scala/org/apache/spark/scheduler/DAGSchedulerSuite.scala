@@ -721,7 +721,7 @@ class DAGSchedulerSuite
     val reduceRdd1 = new MyRDD(sc, 2, List(shuffleDep1))
     val reduceRdd2 = new MyRDD(sc, 2, List(shuffleDep1, shuffleDep2))
 
-    // We need to make our own listeners for this test, since by default submit uses the same
+    // We need to make our own listeners for this test, since by default.conf submit uses the same
     // listener for all jobs, and here we want to capture the failure for each job separately.
     class FailureRecordingJobListener() extends JobListener {
       var failureMessage: String = _

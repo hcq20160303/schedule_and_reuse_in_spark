@@ -44,11 +44,11 @@ object Partitioner {
    *
    * If any of the RDDs already has a partitioner, choose that one.
    *
-   * Otherwise, we use a default HashPartitioner. For the number of partitions, if
-   * spark.default.parallelism is set, then we'll use the value from SparkContext
+   * Otherwise, we use a default.conf HashPartitioner. For the number of partitions, if
+   * spark.default.conf.parallelism is set, then we'll use the value from SparkContext
    * defaultParallelism, otherwise we'll use the max number of upstream partitions.
    *
-   * Unless spark.default.parallelism is set, the number of partitions will be the
+   * Unless spark.default.conf.parallelism is set, the number of partitions will be the
    * same as the number of partitions in the largest upstream RDD, as this should
    * be least likely to cause out-of-memory errors.
    *
@@ -59,7 +59,7 @@ object Partitioner {
     for (r <- bySize if r.partitioner.isDefined && r.partitioner.get.numPartitions > 0) {
       return r.partitioner.get
     }
-    if (rdd.context.conf.contains("spark.default.parallelism")) {
+    if (rdd.context.conf.contains("spark.default.conf.parallelism")) {
       new HashPartitioner(rdd.context.defaultParallelism)
     } else {
       new HashPartitioner(bySize.head.partitions.size)
@@ -109,7 +109,7 @@ class RangePartitioner[K : Ordering : ClassTag, V](
     private var ascending: Boolean = true)
   extends Partitioner {
 
-  // We allow partitions = 0, which happens when sorting an empty RDD under the default settings.
+  // We allow partitions = 0, which happens when sorting an empty RDD under the default.conf settings.
   require(partitions >= 0, s"Number of partitions cannot be negative but found $partitions.")
 
   private var ordering = implicitly[Ordering[K]]

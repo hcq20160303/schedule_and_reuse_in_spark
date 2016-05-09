@@ -68,8 +68,8 @@ private[spark] class FixedLengthBinaryInputFormat
    */
   override def computeSplitSize(blockSize: Long, minSize: Long, maxSize: Long): Long = {
     val defaultSize = super.computeSplitSize(blockSize, minSize, maxSize)
-    // If the default size is less than the length of a record, make it equal to it
-    // Otherwise, make sure the split size is as close to possible as the default size,
+    // If the default.conf size is less than the length of a record, make it equal to it
+    // Otherwise, make sure the split size is as close to possible as the default.conf size,
     // but still contains a complete set of records, with the first record
     // starting at the first byte in the split and the last record ending with the last byte
     if (defaultSize < recordLength) {

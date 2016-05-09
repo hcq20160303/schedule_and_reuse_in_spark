@@ -104,7 +104,7 @@ private[spark] class Executor(
   // to send the result back.
   private val akkaFrameSize = AkkaUtils.maxFrameSizeBytes(conf)
 
-  // Limit of bytes for total size of results (default is 1GB)
+  // Limit of bytes for total size of results (default.conf is 1GB)
   private val maxResultSize = Utils.getMaxResultSize(conf)
 
   // Maintains the list of running tasks.
@@ -294,7 +294,7 @@ private[spark] class Executor(
         case t: Throwable =>
           // Attempt to exit cleanly by informing the driver of our failure.
           // If anything goes wrong (or this was a fatal exception), we will delegate to
-          // the default uncaught exception handler, which will terminate the Executor.
+          // the default.conf uncaught exception handler, which will terminate the Executor.
           logError(s"Exception in $taskName (TID $taskId)", t)
 
           val metrics: Option[TaskMetrics] = Option(task).flatMap { task =>

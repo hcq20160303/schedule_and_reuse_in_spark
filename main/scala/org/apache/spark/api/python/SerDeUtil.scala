@@ -195,7 +195,7 @@ private[spark] object SerDeUtil extends Logging {
 
   /**
    * Convert an RDD of key-value pairs to an RDD of serialized Python objects, that is usable
-   * by PySpark. By default, if serialization fails, toString is called and the string
+   * by PySpark. By default.conf, if serialization fails, toString is called and the string
    * representation is serialized
    */
   def pairRDDToPython(rdd: RDD[(Any, Any)], batchSize: Int): RDD[Array[Byte]] = {

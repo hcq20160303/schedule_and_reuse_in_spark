@@ -751,7 +751,7 @@ private[nio] class ConnectionManager(
                  * (2) Late-arriving ack for a SendMessageStatus
                  *     To avoid unwilling late-arriving ack
                  *     caused by long pause like GC, you can set
-                 *     larger value than default to spark.core.connection.ack.wait.timeout
+                 *     larger value than default.conf to spark.core.connection.ack.wait.timeout
                  */
                 logWarning(s"Could not find reference for received ack Message ${message.id}")
               }

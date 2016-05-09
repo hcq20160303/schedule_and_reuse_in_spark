@@ -133,7 +133,7 @@ private[spark] class LocalBackend(
   }
 
   override def defaultParallelism(): Int =
-    scheduler.conf.getInt("spark.default.parallelism", totalCores)
+    scheduler.conf.getInt("spark.default.conf.parallelism", totalCores)
 
   override def killTask(taskId: Long, executorId: String, interruptThread: Boolean) {
     localEndpoint.send(KillTask(taskId, interruptThread))

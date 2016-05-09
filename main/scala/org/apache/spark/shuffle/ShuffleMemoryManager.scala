@@ -41,7 +41,7 @@ import org.apache.spark.{Logging, SparkException, SparkConf, TaskContext}
  * Use `ShuffleMemoryManager.create()` factory method to create a new instance.
  *
  * @param maxMemory total amount of memory available for execution, in bytes.
- * @param pageSizeBytes number of bytes for each page, by default.
+ * @param pageSizeBytes number of bytes for each page, by default.conf.
  */
 private[spark]
 class ShuffleMemoryManager protected (
@@ -167,7 +167,7 @@ private[spark] object ShuffleMemoryManager {
   /**
    * Sets the page size, in bytes.
    *
-   * If user didn't explicitly set "spark.buffer.pageSize", we figure out the default value
+   * If user didn't explicitly set "spark.buffer.pageSize", we figure out the default.conf value
    * by looking at the number of cores available to the process, and the total amount of memory,
    * and then divide it by a factor of safety.
    */

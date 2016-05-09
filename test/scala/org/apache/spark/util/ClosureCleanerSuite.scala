@@ -35,7 +35,7 @@ class ClosureCleanerSuite extends SparkFunSuite {
     assert(obj.run() === 30) // 6 + 7 + 8 + 9
   }
 
-  test("closures inside a class with no default constructor") {
+  test("closures inside a class with no default.conf constructor") {
     val obj = new TestClassWithoutDefaultConstructor(5)
     assert(obj.run() === 30) // 6 + 7 + 8 + 9
   }

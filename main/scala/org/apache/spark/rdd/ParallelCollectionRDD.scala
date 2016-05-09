@@ -52,7 +52,7 @@ private[spark] class ParallelCollectionPartition[T: ClassTag](
 
     val sfactory = SparkEnv.get.serializer
 
-    // Treat java serializer with default action rather than going thru serialization, to avoid a
+    // Treat java serializer with default.conf action rather than going thru serialization, to avoid a
     // separate serialization header.
 
     sfactory match {

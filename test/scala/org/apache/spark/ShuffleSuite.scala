@@ -55,7 +55,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
       (x, new NonJavaSerializableClass(x * 2))
     }
     // If the Kryo serializer is not used correctly, the shuffle would fail because the
-    // default Java serializer cannot handle the non serializable class.
+    // default.conf Java serializer cannot handle the non serializable class.
     val c = new ShuffledRDD[Int,
       NonJavaSerializableClass,
       NonJavaSerializableClass](b, new HashPartitioner(NUM_BLOCKS))
@@ -79,7 +79,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
       (x, new NonJavaSerializableClass(x * 2))
     }
     // If the Kryo serializer is not used correctly, the shuffle would fail because the
-    // default Java serializer cannot handle the non serializable class.
+    // default.conf Java serializer cannot handle the non serializable class.
     val c = new ShuffledRDD[Int,
       NonJavaSerializableClass,
       NonJavaSerializableClass](b, new HashPartitioner(3))
@@ -96,7 +96,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     val a = sc.parallelize(1 to 4, NUM_BLOCKS)
     val b = a.map(x => (x, x*2))
 
-    // NOTE: The default Java serializer doesn't create zero-sized blocks.
+    // NOTE: The default.conf Java serializer doesn't create zero-sized blocks.
     //       So, use Kryo
     val c = new ShuffledRDD[Int, Int, Int](b, new HashPartitioner(NUM_BLOCKS))
       .setSerializer(new KryoSerializer(conf))
@@ -123,7 +123,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     val a = sc.parallelize(1 to 4, NUM_BLOCKS)
     val b = a.map(x => (x, x*2))
 
-    // NOTE: The default Java serializer should create zero-sized blocks
+    // NOTE: The default.conf Java serializer should create zero-sized blocks
     val c = new ShuffledRDD[Int, Int, Int](b, new HashPartitioner(NUM_BLOCKS))
 
     val shuffleId = c.dependencies.head.asInstanceOf[ShuffleDependency[_, _, _]].shuffleId
@@ -216,7 +216,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
       (new NonJavaSerializableClass(x), x)
     }
     // If the Kryo serializer is not used correctly, the shuffle would fail because the
-    // default Java serializer cannot handle the non serializable class.
+    // default.conf Java serializer cannot handle the non serializable class.
     val c = b.sortByKey().map(x => x._2)
     assert(c.collect() === Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
   }
@@ -228,7 +228,7 @@ abstract class ShuffleSuite extends SparkFunSuite with Matchers with LocalSparkC
     val b = a.map { x =>
       (new NonJavaSerializableClass(x), x)
     }
-    // default Java serializer cannot handle the non serializable class.
+    // default.conf Java serializer cannot handle the non serializable class.
     val thrown = intercept[SparkException] {
       b.sortByKey().collect()
     }

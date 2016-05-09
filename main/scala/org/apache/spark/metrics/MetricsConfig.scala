@@ -43,7 +43,7 @@ private[spark] class MetricsConfig(conf: SparkConf) extends Logging {
   }
 
   def initialize() {
-    // Add default properties in case there's no properties file
+    // Add default.conf properties in case there's no properties file
     setDefaultProperties(properties)
 
     loadPropertiesFromFile(conf.getOption("spark.metrics.conf"))

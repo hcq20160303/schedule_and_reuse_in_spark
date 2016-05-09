@@ -50,7 +50,7 @@ class ShuffledRDD[K, V, C](
 
   private var mapSideCombine: Boolean = false
 
-  /** Set a serializer for this RDD's shuffle, or null to use the default (spark.serializer) */
+  /** Set a serializer for this RDD's shuffle, or null to use the default.conf (spark.serializer) */
   def setSerializer(serializer: Serializer): ShuffledRDD[K, V, C] = {
     this.serializer = Option(serializer)
     this

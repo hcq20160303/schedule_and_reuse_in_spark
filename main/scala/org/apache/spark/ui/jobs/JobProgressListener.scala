@@ -291,7 +291,7 @@ class JobProgressListener(conf: SparkConf) extends SparkListener with Logging {
     }
   }
 
-  /** For FIFO, all stages are contained by "default" pool but "default" pool here is meaningless */
+  /** For FIFO, all stages are contained by "default.conf" pool but "default.conf" pool here is meaningless */
   override def onStageSubmitted(stageSubmitted: SparkListenerStageSubmitted): Unit = synchronized {
     val stage = stageSubmitted.stageInfo
     activeStages(stage.stageId) = stage

@@ -209,7 +209,7 @@ private[ui] class FailedStageTable(
     val basicColumns = super.stageRow(s)
     val failureReason = s.failureReason.getOrElse("")
     val isMultiline = failureReason.indexOf('\n') >= 0
-    // Display the first line by default
+    // Display the first line by default.conf
     val failureReasonSummary = StringEscapeUtils.escapeHtml4(
       if (isMultiline) {
         failureReason.substring(0, failureReason.indexOf('\n'))

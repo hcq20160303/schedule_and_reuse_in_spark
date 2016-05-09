@@ -70,7 +70,7 @@ private[spark] class ContextCleaner(sc: SparkContext) extends Logging {
    * Whether the cleaning thread will block on cleanup tasks (other than shuffle, which
    * is controlled by the `spark.cleaner.referenceTracking.blocking.shuffle` parameter).
    *
-   * Due to SPARK-3015, this is set to true by default. This is intended to be only a temporary
+   * Due to SPARK-3015, this is set to true by default.conf. This is intended to be only a temporary
    * workaround for the issue, which is ultimately caused by the way the BlockManager actors
    * issue inter-dependent blocking Akka messages to each other at high frequencies. This happens,
    * for instance, when the driver performs a GC and cleans up all broadcast blocks that are no
@@ -84,7 +84,7 @@ private[spark] class ContextCleaner(sc: SparkContext) extends Logging {
    *
    * When context cleaner is configured to block on every delete request, it can throw timeout
    * exceptions on cleanup of shuffle blocks, as reported in SPARK-3139. To avoid that, this
-   * parameter by default disables blocking on shuffle cleanups. Note that this does not affect
+   * parameter by default.conf disables blocking on shuffle cleanups. Note that this does not affect
    * the cleanup of RDDs and broadcasts. This is intended to be a temporary workaround,
    * until the real Akka issue (referred to in the comment above `blockOnCleanupTasks`) is
    * resolved.

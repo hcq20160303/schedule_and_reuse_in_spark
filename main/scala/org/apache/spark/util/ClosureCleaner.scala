@@ -131,7 +131,7 @@ private[spark] object ClosureCleaner extends Logging {
    * simply mutate the enclosing closures in place, as other code paths may depend on them.
    * Instead, we clone each enclosing closure and set the parent pointers accordingly.
    *
-   * By default, closures are cleaned transitively. This means we detect whether enclosing
+   * By default.conf, closures are cleaned transitively. This means we detect whether enclosing
    * objects are actually referenced by the starting one, either directly or transitively,
    * and, if not, sever these closures from the hierarchy. In other words, in addition to
    * nulling out unused field references, we also null out any parent pointers that refer

@@ -300,7 +300,7 @@ class CoarseGrainedSchedulerBackend(scheduler: TaskSchedulerImpl, val rpcEnv: Rp
   }
 
   override def defaultParallelism(): Int = {
-    conf.getInt("spark.default.parallelism", math.max(totalCoreCount.get(), 2))
+    conf.getInt("spark.default.conf.parallelism", math.max(totalCoreCount.get(), 2))
   }
 
   // Called by subclasses when notified of a lost worker

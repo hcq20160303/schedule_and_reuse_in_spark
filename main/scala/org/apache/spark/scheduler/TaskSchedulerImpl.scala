@@ -107,7 +107,7 @@ private[spark] class TaskSchedulerImpl(
 
   var schedulableBuilder: SchedulableBuilder = null
   var rootPool: Pool = null
-  // default scheduler is FIFO
+  // default.conf scheduler is FIFO
   private val schedulingModeConf = conf.get("spark.scheduler.mode", "FIFO")
   val schedulingMode: SchedulingMode = try {
     SchedulingMode.withName(schedulingModeConf.toUpperCase)
@@ -520,7 +520,7 @@ private[spark] class TaskSchedulerImpl(
     activeExecutorIds.contains(execId)
   }
 
-  // By default, rack is unknown
+  // By default.conf, rack is unknown
   def getRackForHost(value: String): Option[String] = None
 
   private def waitBackendReady(): Unit = {

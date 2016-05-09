@@ -85,7 +85,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
     Option(propertiesFile).foreach { filename =>
       Utils.getPropertiesFromFile(filename).foreach { case (k, v) =>
         defaultProperties(k) = v
-        if (verbose) SparkSubmit.printStream.println(s"Adding default property: $k=$v")
+        if (verbose) SparkSubmit.printStream.println(s"Adding default.conf property: $k=$v")
       }
     }
     // scalastyle:on println
@@ -109,7 +109,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
   validateArguments()
 
   /**
-   * Merge values from the default properties file with those specified through --conf.
+   * Merge values from the default.conf properties file with those specified through --conf.
    * When this is called, `sparkProperties` is already filled with configs from the latter.
    */
   private def mergeDefaultSparkProperties(): Unit = {
@@ -537,7 +537,7 @@ private[deploy] class SparkSubmitArguments(args: Seq[String], env: Map[String, S
         | YARN-only:
         |  --driver-cores NUM          Number of cores used by the driver, only in cluster mode
         |                              (Default: 1).
-        |  --queue QUEUE_NAME          The YARN queue to submit to (Default: "default").
+        |  --queue QUEUE_NAME          The YARN queue to submit to (Default: "default.conf").
         |  --num-executors NUM         Number of executors to launch (Default: 2).
         |  --archives ARCHIVES         Comma separated list of archives to be extracted into the
         |                              working directory of each executor.

@@ -33,8 +33,8 @@ private[spark] object ShutdownHookManager extends Logging {
   val DEFAULT_SHUTDOWN_PRIORITY = 100
 
   /**
-   * The shutdown priority of the SparkContext instance. This is lower than the default
-   * priority, so that by default hooks are run before the context is shut down.
+   * The shutdown priority of the SparkContext instance. This is lower than the default.conf
+   * priority, so that by default.conf hooks are run before the context is shut down.
    */
   val SPARK_CONTEXT_SHUTDOWN_PRIORITY = 50
 
@@ -169,7 +169,7 @@ private[spark] object ShutdownHookManager extends Logging {
   }
 
   /**
-   * Adds a shutdown hook with default priority.
+   * Adds a shutdown hook with default.conf priority.
    *
    * @param hook The code to run during shutdown.
    * @return A handle that can be used to unregister the shutdown hook.

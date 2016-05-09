@@ -55,7 +55,7 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
 
   // Common RDD functions
 
-  /** Persist this RDD with the default storage level (`MEMORY_ONLY`). */
+  /** Persist this RDD with the default.conf storage level (`MEMORY_ONLY`). */
   def cache(): JavaPairRDD[K, V] = new JavaPairRDD[K, V](rdd.cache())
 
   /**
@@ -152,7 +152,7 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
    * RDD, to produce a sample of size that's approximately equal to the sum of
    * math.ceil(numItems * samplingRate) over all key values.
    *
-   * Use Utils.random.nextLong as the default seed for the random number generator.
+   * Use Utils.random.nextLong as the default.conf seed for the random number generator.
    */
   def sampleByKey(withReplacement: Boolean,
       fractions: JMap[K, Double]): JavaPairRDD[K, V] =
@@ -186,7 +186,7 @@ class JavaPairRDD[K, V](val rdd: RDD[(K, V)])
    * additional pass over the RDD to guarantee sample size; when sampling with replacement, we need
    * two additional passes.
    *
-   * Use Utils.random.nextLong as the default seed for the random number generator.
+   * Use Utils.random.nextLong as the default.conf seed for the random number generator.
    */
   @Experimental
   def sampleByKeyExact(withReplacement: Boolean, fractions: JMap[K, Double]): JavaPairRDD[K, V] =

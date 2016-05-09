@@ -45,7 +45,7 @@ import org.apache.spark.util.Utils
  * *and* SPARK_JAVA_OPTS:
  *   - spark.deploy.recoveryMode=ZOOKEEPER
  *   - spark.deploy.zookeeper.url=172.17.42.1:2181
- * Note that 172.17.42.1 is the default docker ip for the host and 2181 is the default ZK port.
+ * Note that 172.17.42.1 is the default.conf docker ip for the host and 2181 is the default.conf ZK port.
  *
  * In case of failure, make sure to kill off prior docker containers before restarting:
  *   docker kill $(docker ps -q)
@@ -76,7 +76,7 @@ private object FaultToleranceTest extends App with Logging {
   private val containerSparkHome = "/opt/spark"
   private val dockerMountDir = "%s:%s".format(sparkHome, containerSparkHome)
 
-  System.setProperty("spark.driver.host", "172.17.42.1") // default docker host ip
+  System.setProperty("spark.driver.host", "172.17.42.1") // default.conf docker host ip
 
   private def afterEach() {
     if (sc != null) {

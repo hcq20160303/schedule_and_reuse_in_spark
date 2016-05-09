@@ -261,10 +261,10 @@ private[spark] object RpcTimeout {
   /**
    * Lookup the timeout property in the configuration and create
    * a RpcTimeout with the property key in the description.
-   * Uses the given default value if property is not set
+   * Uses the given default.conf value if property is not set
    * @param conf configuration properties containing the timeout
    * @param timeoutProp property key for the timeout in seconds
-   * @param defaultValue default timeout value in seconds if property not found
+   * @param defaultValue default.conf timeout value in seconds if property not found
    */
   def apply(conf: SparkConf, timeoutProp: String, defaultValue: String): RpcTimeout = {
     val timeout = { conf.getTimeAsSeconds(timeoutProp, defaultValue) seconds }
@@ -275,15 +275,15 @@ private[spark] object RpcTimeout {
    * Lookup prioritized list of timeout properties in the configuration
    * and create a RpcTimeout with the first set property key in the
    * description.
-   * Uses the given default value if property is not set
+   * Uses the given default.conf value if property is not set
    * @param conf configuration properties containing the timeout
    * @param timeoutPropList prioritized list of property keys for the timeout in seconds
-   * @param defaultValue default timeout value in seconds if no properties found
+   * @param defaultValue default.conf timeout value in seconds if no properties found
    */
   def apply(conf: SparkConf, timeoutPropList: Seq[String], defaultValue: String): RpcTimeout = {
     require(timeoutPropList.nonEmpty)
 
-    // Find the first set property or use the default value with the first property
+    // Find the first set property or use the default.conf value with the first property
     val itr = timeoutPropList.iterator
     var foundProp: Option[(String, String)] = None
     while (itr.hasNext && foundProp.isEmpty){

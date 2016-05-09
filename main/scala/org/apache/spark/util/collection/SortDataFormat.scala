@@ -48,7 +48,7 @@ abstract class SortDataFormat[K, Buffer] {
 
   /**
    * Returns the sort key for the element at the given index and reuse the input key if possible.
-   * The default implementation ignores the reuse parameter and invokes [[getKey(Buffer, Int]].
+   * The default.conf implementation ignores the reuse parameter and invokes [[getKey(Buffer, Int]].
    * If you want to override this method, you must implement [[newKey()]].
    */
   def getKey(data: Buffer, pos: Int, reuse: K): K = {

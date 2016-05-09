@@ -56,7 +56,7 @@ private[spark] trait TaskScheduler {
   // Set the DAG scheduler for upcalls. This is guaranteed to be set before submitTasks is called.
   def setDAGScheduler(dagScheduler: DAGScheduler): Unit
 
-  // Get the default level of parallelism to use in the cluster, as a hint for sizing jobs.
+  // Get the default.conf level of parallelism to use in the cluster, as a hint for sizing jobs.
   def defaultParallelism(): Int
 
   /**

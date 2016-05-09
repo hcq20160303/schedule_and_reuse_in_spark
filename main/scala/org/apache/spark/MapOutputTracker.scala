@@ -101,7 +101,7 @@ private[spark] abstract class MapOutputTracker(conf: SparkConf) extends Logging 
   private val fetching = new HashSet[Int]
 
   /**
-   * Send a message to the trackerEndpoint and get its result within a default timeout, or
+   * Send a message to the trackerEndpoint and get its result within a default.conf timeout, or
    * throw a SparkException if this fails.
    */
   protected def askTracker[T: ClassTag](message: Any): T = {

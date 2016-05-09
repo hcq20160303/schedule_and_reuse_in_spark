@@ -53,7 +53,7 @@ import org.apache.spark.util.Utils
  *
  * Spark has a set of modify acls (`spark.modify.acls`) that controls which users have permission
  * to  modify a single application. This would include things like killing the application. By
- * default the person who started the application has modify access. For modify access through
+ * default.conf the person who started the application has modify access. For modify access through
  * the UI, you must have a filter that does authentication in place for the modify acls to work
  * properly.
  *
@@ -88,7 +88,7 @@ import org.apache.spark.util.Utils
  *            below).
  *
  *            The Spark HttpServer installs the HashLoginServer and configures it to DIGEST-MD5.
- *            Any clients must specify the user and password. There is a default
+ *            Any clients must specify the user and password. There is a default.conf
  *            Authenticator installed in the SecurityManager to how it does the authentication
  *            and in this case gets the user name and password from the request.
  *
@@ -156,7 +156,7 @@ import org.apache.spark.util.Utils
  *  cases.
  *
  *  SSL can be used for encryption for certain communication channels. The user can configure the
- *  default SSL settings which will be used for all the supported communication protocols unless
+ *  default.conf SSL settings which will be used for all the supported communication protocols unless
  *  they are overwritten by protocol specific settings. This way the user can easily provide the
  *  common settings for all the protocols without disabling the ability to configure each one
  *  individually.
@@ -239,10 +239,10 @@ private[spark] class SecurityManager(sparkConf: SparkConf)
     )
   }
 
-  // the default SSL configuration - it will be used by all communication layers unless overwritten
+  // the default.conf SSL configuration - it will be used by all communication layers unless overwritten
   private val defaultSSLOptions = SSLOptions.parse(sparkConf, "spark.ssl", defaults = None)
 
-  // SSL configuration for different communication layers - they can override the default
+  // SSL configuration for different communication layers - they can override the default.conf
   // configuration at a specified namespace. The namespace *must* start with spark.ssl.
   val fileServerSSLOptions = SSLOptions.parse(sparkConf, "spark.ssl.fs", Some(defaultSSLOptions))
   val akkaSSLOptions = SSLOptions.parse(sparkConf, "spark.ssl.akka", Some(defaultSSLOptions))

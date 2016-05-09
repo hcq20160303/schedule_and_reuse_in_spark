@@ -62,7 +62,7 @@ private[spark] abstract class RestSubmissionServer(
     s"$baseContext/create/*" -> submitRequestServlet,
     s"$baseContext/kill/*" -> killRequestServlet,
     s"$baseContext/status/*" -> statusRequestServlet,
-    "/*" -> new ErrorServlet // default handler
+    "/*" -> new ErrorServlet // default.conf handler
   )
 
   /** Start the server and return the bound port. */
@@ -272,7 +272,7 @@ private[rest] abstract class SubmitRequestServlet extends RestServlet {
 }
 
 /**
- * A default servlet that handles error cases that are not captured by other servlets.
+ * A default.conf servlet that handles error cases that are not captured by other servlets.
  */
 private class ErrorServlet extends RestServlet {
   private val serverVersion = RestSubmissionServer.PROTOCOL_VERSION

@@ -184,7 +184,7 @@ object SparkSubmit {
      // In standalone cluster mode, there are two submission gateways:
      //   (1) The traditional Akka gateway using o.a.s.deploy.Client as a wrapper
      //   (2) The new REST-based gateway introduced in Spark 1.3
-     // The latter is the default behavior as of Spark 1.3, but Spark submit will fail over
+     // The latter is the default.conf behavior as of Spark 1.3, but Spark submit will fail over
      // to use the legacy gateway if the master endpoint turns out to be not a REST server.
     if (args.isStandaloneCluster && args.useRest) {
       try {
@@ -232,7 +232,7 @@ object SparkSubmit {
       case _ => printErrorAndExit("Master must start with yarn, spark, mesos, or local"); -1
     }
 
-    // Set the deploy mode; default is client mode
+    // Set the deploy mode; default.conf is client mode
     var deployMode: Int = args.deployMode match {
       case "client" | null => CLIENT
       case "cluster" => CLUSTER
@@ -557,7 +557,7 @@ object SparkSubmit {
       }
     }
 
-    // Load any properties specified through --conf and the default properties file
+    // Load any properties specified through --conf and the default.conf properties file
     for ((k, v) <- args.sparkProperties) {
       sysProps.getOrElseUpdate(k, v)
     }
@@ -583,7 +583,7 @@ object SparkSubmit {
 
     // Resolve and format python file paths properly before adding them to the PYTHONPATH.
     // The resolving part is redundant in the case of --py-files, but necessary if the user
-    // explicitly sets `spark.submit.pyFiles` in his/her default properties file.
+    // explicitly sets `spark.submit.pyFiles` in his/her default.conf properties file.
     sysProps.get("spark.submit.pyFiles").foreach { pyFiles =>
       val resolvedPyFiles = Utils.resolveURIs(pyFiles)
       val formattedPyFiles = PythonRunner.formatPaths(resolvedPyFiles).mkString(",")
@@ -937,7 +937,7 @@ private[spark] object SparkSubmitUtils {
         System.setOut(printStream)
         val artifacts = extractMavenCoordinates(coordinates)
         // Default configuration name for ivy
-        val ivyConfName = "default"
+        val ivyConfName = "default.conf"
         // set ivy settings for location of cache
         val ivySettings: IvySettings = new IvySettings
         // Directories for caching downloads through ivy and storing the jars when maven coordinates
@@ -980,7 +980,7 @@ private[spark] object SparkSubmitUtils {
         // A Module descriptor must be specified. Entries are dummy strings
         val md = getModuleDescriptor
         // clear ivy resolution from previous launches. The resolution file is usually at
-        // ~/.ivy2/org.apache.spark-spark-submit-parent-default.xml. In between runs, this file
+        // ~/.ivy2/org.apache.spark-spark-submit-parent-default.conf.xml. In between runs, this file
         // leads to confusion with Ivy when the files can no longer be found at the repository
         // declared in that file/
         val mdId = md.getModuleRevisionId

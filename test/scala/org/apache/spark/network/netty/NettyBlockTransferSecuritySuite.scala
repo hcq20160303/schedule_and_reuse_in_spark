@@ -37,7 +37,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatest.ShouldMatchers
 
 class NettyBlockTransferSecuritySuite extends SparkFunSuite with MockitoSugar with ShouldMatchers {
-  test("security default off") {
+  test("security default.conf off") {
     val conf = new SparkConf()
       .set("spark.app.id", "app-id")
     testConnection(conf, conf) match {

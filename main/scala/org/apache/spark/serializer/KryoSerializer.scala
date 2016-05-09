@@ -109,7 +109,7 @@ class KryoSerializer(conf: SparkConf)
 
     try {
       // scalastyle:off classforname
-      // Use the default classloader when calling the user registrator.
+      // Use the default.conf classloader when calling the user registrator.
       Thread.currentThread.setContextClassLoader(classLoader)
       // Register classes given through spark.kryo.classesToRegister.
       classesToRegister

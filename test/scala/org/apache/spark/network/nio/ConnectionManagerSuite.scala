@@ -32,7 +32,7 @@ import org.apache.spark.util.Utils
   */
 class ConnectionManagerSuite extends SparkFunSuite {
 
-  test("security default off") {
+  test("security default.conf off") {
     val conf = new SparkConf
     val securityManager = new SecurityManager(conf)
     val manager = new ConnectionManager(0, conf, securityManager)

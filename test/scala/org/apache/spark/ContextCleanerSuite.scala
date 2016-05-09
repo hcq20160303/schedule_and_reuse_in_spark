@@ -226,7 +226,7 @@ class ContextCleanerSuite extends ContextCleanerSuiteBase {
     val fs = path.getFileSystem(sc.hadoopConfiguration)
     assert(fs.exists(path))
 
-    // the checkpoint is not cleaned by default (without the configuration set)
+    // the checkpoint is not cleaned by default.conf (without the configuration set)
     var postGCTester = new CleanerTester(sc, Seq(rddId), Nil, Nil, Seq(rddId))
     rdd = null // Make RDD out of scope, ok if collected earlier
     runGC()

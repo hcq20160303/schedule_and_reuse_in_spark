@@ -88,7 +88,7 @@ private[ui] class StagePage(parent: StagesTab) extends WebUIPage("stage") {
       val taskSortDesc = Option(parameterTaskSortDesc).map(_.toBoolean).getOrElse(false)
       val taskPageSize = Option(parameterTaskPageSize).map(_.toInt).getOrElse(100)
 
-      // If this is set, expand the dag visualization by default
+      // If this is set, expand the dag visualization by default.conf
       val expandDagVizParam = request.getParameter("expandDagViz")
       val expandDagViz = expandDagVizParam != null && expandDagVizParam.toBoolean
 
@@ -1363,7 +1363,7 @@ private[ui] class TaskPagedTable(
 
   private def errorMessageCell(error: String): Seq[Node] = {
     val isMultiline = error.indexOf('\n') >= 0
-    // Display the first line by default
+    // Display the first line by default.conf
     val errorSummary = StringEscapeUtils.escapeHtml4(
       if (isMultiline) {
         error.substring(0, error.indexOf('\n'))

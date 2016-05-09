@@ -696,7 +696,7 @@ private[spark] object PythonRDD extends Logging {
    * types using either user specified converters or, if not specified,
    * [[org.apache.spark.api.python.JavaToWritableConverter]]. Post-conversion types
    * `keyClass` and `valueClass` are automatically inferred if not specified. The passed-in
-   * `confAsMap` is merged with the default Hadoop conf associated with the SparkContext of
+   * `confAsMap` is merged with the default.conf Hadoop conf associated with the SparkContext of
    * this RDD.
    */
   def saveAsHadoopFile[K, V, F <: OutputFormat[_, _], C <: CompressionCodec](
@@ -727,7 +727,7 @@ private[spark] object PythonRDD extends Logging {
    * types using either user specified converters or, if not specified,
    * [[org.apache.spark.api.python.JavaToWritableConverter]]. Post-conversion types
    * `keyClass` and `valueClass` are automatically inferred if not specified. The passed-in
-   * `confAsMap` is merged with the default Hadoop conf associated with the SparkContext of
+   * `confAsMap` is merged with the default.conf Hadoop conf associated with the SparkContext of
    * this RDD.
    */
   def saveAsNewAPIHadoopFile[K, V, F <: NewOutputFormat[_, _]](
@@ -756,7 +756,7 @@ private[spark] object PythonRDD extends Logging {
    * e.g., output path, output format, etc), in the same way as it would be configured for
    * a Hadoop MapReduce job. Both old and new Hadoop OutputFormat APIs are supported
    * (mapred vs. mapreduce). Keys/values are converted for output using either user specified
-   * converters or, by default, [[org.apache.spark.api.python.JavaToWritableConverter]].
+   * converters or, by default.conf, [[org.apache.spark.api.python.JavaToWritableConverter]].
    */
   def saveAsHadoopDataset[K, V](
       pyRDD: JavaRDD[Array[Byte]],

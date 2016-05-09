@@ -120,7 +120,7 @@ class StorageSuite extends SparkFunSuite {
     assert(status.rddStorageLevel(1) === Some(memAndDisk))
     assert(status.rddStorageLevel(2) === Some(memAndDisk))
 
-    // Verify default values for RDDs that don't exist
+    // Verify default.conf values for RDDs that don't exist
     assert(status.rddBlocksById(10).isEmpty)
     assert(status.memUsedByRdd(10) === 0L)
     assert(status.diskUsedByRdd(10) === 0L)

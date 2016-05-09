@@ -22,7 +22,7 @@ package org.apache.spark.ui.jobs
  * to optionally show/hide columns.
  *
  * If new optional metrics are added here, they should also be added to the end of webui.css
- * to have the style set to "display: none;" by default.
+ * to have the style set to "display: none;" by default.conf.
  */
 private[spark] object TaskDetailsClassNames {
   val SCHEDULER_DELAY = "scheduler_delay"

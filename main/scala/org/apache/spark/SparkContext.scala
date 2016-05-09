@@ -73,7 +73,7 @@ import org.apache.spark.util._
  * creating a new one.  This limitation may eventually be removed; see SPARK-2243 for more details.
  *
  * @param config a Spark Config object describing the application configuration. Any settings in
- *   this config overrides the default configs as well as system properties.
+ *   this config overrides the default.conf configs as well as system properties.
  */
 class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationClient {
 
@@ -165,7 +165,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
     this.preferredNodeLocationData = preferredNodeLocationData
   }
 
-  // NOTE: The below constructors could be consolidated using default arguments. Due to
+  // NOTE: The below constructors could be consolidated using default.conf arguments. Due to
   // Scala bug SI-8479, however, this causes the compile step to fail when generating docs.
   // Until we have a good workaround for that bug the constructors remain broken out.
 
@@ -294,7 +294,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
   private[spark] def ui: Option[SparkUI] = _ui
 
   /**
-   * A default Hadoop Configuration for the Hadoop code (e.g. file systems) that we reuse.
+   * A default.conf Hadoop Configuration for the Hadoop code (e.g. file systems) that we reuse.
    *
    * '''Note:''' As it will be reused in all Hadoop RDDs, it's better not to modify it unless you
    * plan to set some global configurations for all Hadoop RDDs.
@@ -671,7 +671,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    *
    * If interruptOnCancel is set to true for the job group, then job cancellation will result
    * in Thread.interrupt() being called on the job's executor threads. This is useful to help ensure
-   * that the tasks are actually stopped in a timely manner, but is off by default due to HDFS-1208,
+   * that the tasks are actually stopped in a timely manner, but is off by default.conf due to HDFS-1208,
    * where HDFS may respond to Thread.interrupt() by marking nodes as dead.
    */
   def setJobGroup(groupId: String, description: String, interruptOnCancel: Boolean = false) {
@@ -1207,7 +1207,7 @@ class SparkContext(config: SparkConf) extends Logging with ExecutorAllocationCli
    * Load an RDD saved as a SequenceFile containing serialized objects, with NullWritable keys and
    * BytesWritable values that contain a serialized partition. This is still an experimental
    * storage format and may not be supported exactly as is in future Spark releases. It will also
-   * be pretty slow if you use the default serializer (Java serialization),
+   * be pretty slow if you use the default.conf serializer (Java serialization),
    * though the nice thing about it is that there's very little effort required to save arbitrary
    * objects.
    */
@@ -2521,7 +2521,7 @@ object SparkContext extends Logging {
   /**
    * Creates a modified version of a SparkConf with the parameters that can be passed separately
    * to SparkContext, to make it easier to write SparkContext's constructors. This ignores
-   * parameters that are passed as the default value of null, instead of throwing an exception
+   * parameters that are passed as the default.conf value of null, instead of throwing an exception
    * like SparkConf would.
    */
   private[spark] def updatedConf(

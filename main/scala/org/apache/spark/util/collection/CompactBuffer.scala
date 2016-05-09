@@ -21,7 +21,7 @@ import scala.reflect.ClassTag
 
 /**
  * An append-only buffer similar to ArrayBuffer, but more memory-efficient for small buffers.
- * ArrayBuffer always allocates an Object array to store the data, with 16 entries by default,
+ * ArrayBuffer always allocates an Object array to store the data, with 16 entries by default.conf,
  * so it has about 80-100 bytes of overhead. In contrast, CompactBuffer can keep up to two
  * elements in fields of the main object, and only allocates an Array[AnyRef] if there are more
  * entries than that. This makes it more efficient for operations like groupBy where we expect

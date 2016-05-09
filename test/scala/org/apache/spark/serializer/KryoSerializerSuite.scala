@@ -47,7 +47,7 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
       new KryoSerializer(kryoConf).newInstance()
     }
 
-    // test default values
+    // test default.conf values
     newKryoInstance(conf, "64k", "64m")
     // 2048m = 2097152k
     // should not throw exception when kryoBufferMaxProperty < kryoBufferProperty
@@ -249,7 +249,7 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
     val control = 1 :: 2 :: Nil
     // zeroValue must not be a ClassWithoutNoArgConstructor instance because it will be
     // serialized by spark.closure.serializer but spark.closure.serializer only supports
-    // the default Java serializer.
+    // the default.conf Java serializer.
     val result = sc.parallelize(control, 2).map(new ClassWithoutNoArgConstructor(_))
       .fold(null)((t1, t2) => {
       val t1x = if (t1 == null) 0 else t1.x
@@ -268,7 +268,7 @@ class KryoSerializerSuite extends SparkFunSuite with SharedSparkContext {
     assert(thrown.getMessage.contains("Failed to register classes with Kryo"))
   }
 
-  test("default class loader can be set by a different thread") {
+  test("default.conf class loader can be set by a different thread") {
     val ser = new KryoSerializer(new SparkConf)
 
     // First serialize the object

@@ -92,8 +92,8 @@ private[master] class MasterArguments(args: Array[String], conf: SparkConf) {
       "Options:\n" +
       "  -i HOST, --ip HOST     Hostname to listen on (deprecated, please use --host or -h) \n" +
       "  -h HOST, --host HOST   Hostname to listen on\n" +
-      "  -p PORT, --port PORT   Port to listen on (default: 7077)\n" +
-      "  --webui-port PORT      Port for web UI (default: 8080)\n" +
+      "  -p PORT, --port PORT   Port to listen on (default.conf: 7077)\n" +
+      "  --webui-port PORT      Port for web UI (default.conf: 8080)\n" +
       "  --properties-file FILE Path to a custom Spark properties file.\n" +
       "                         Default is conf/spark-defaults.conf.")
     // scalastyle:on println

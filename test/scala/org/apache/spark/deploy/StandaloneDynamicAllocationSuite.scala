@@ -70,7 +70,7 @@ class StandaloneDynamicAllocationSuite
     super.afterAll()
   }
 
-  test("dynamic allocation default behavior") {
+  test("dynamic allocation default.conf behavior") {
     sc = new SparkContext(appConf)
     val appId = sc.applicationId
     assert(master.apps.size === 1)

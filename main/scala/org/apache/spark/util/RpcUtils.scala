@@ -46,7 +46,7 @@ object RpcUtils {
     conf.getTimeAsMs("spark.rpc.retry.wait", "3s")
   }
 
-  /** Returns the default Spark timeout to use for RPC ask operations. */
+  /** Returns the default.conf Spark timeout to use for RPC ask operations. */
   private[spark] def askRpcTimeout(conf: SparkConf): RpcTimeout = {
     RpcTimeout(conf, Seq("spark.rpc.askTimeout", "spark.network.timeout"), "120s")
   }
@@ -56,7 +56,7 @@ object RpcUtils {
     askRpcTimeout(conf).duration
   }
 
-  /** Returns the default Spark timeout to use for RPC remote endpoint lookup. */
+  /** Returns the default.conf Spark timeout to use for RPC remote endpoint lookup. */
   private[spark] def lookupRpcTimeout(conf: SparkConf): RpcTimeout = {
     RpcTimeout(conf, Seq("spark.rpc.lookupTimeout", "spark.network.timeout"), "120s")
   }
