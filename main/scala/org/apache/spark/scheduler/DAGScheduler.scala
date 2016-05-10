@@ -556,13 +556,20 @@ class DAGScheduler(
       callSite: CallSite,
       resultHandler: (Int, U) => Unit,
       properties: Properties): Unit = {
+    var newRDD: RDD[T] = null
     if ( !rdd.isCache ){
       val rddShare = new RDDShare(rdd)
-      RDDShare.synchronized(rddShare.dagMatcherAndRewriter)
+      RDDShare.synchronized(
+        newRDD = rddShare.dagMatcherAndRewriter.asInstanceOf[RDD[T]] )
       rddShare.getCache
     }
     val start = System.nanoTime
-    val waiter = submitJob(rdd, func, partitions, callSite, resultHandler, properties)
+    var rddnew: RDD[T] = rdd
+    if ( newRDD != null){
+      println("DAGScheduler----: "+ newRDD.dependencies.toString() + " \t "+newRDD.name)
+      rddnew = newRDD
+    }
+    val waiter = submitJob(rddnew, func, partitions, callSite, resultHandler, properties)
     waiter.awaitResult() match {
       case JobSucceeded =>
         logInfo("Job %d finished: %s, took %f s".format

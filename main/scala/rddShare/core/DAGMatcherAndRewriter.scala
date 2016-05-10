@@ -13,7 +13,7 @@ import org.apache.spark.rdd.RDD
 
 object DAGMatcherAndRewriter {
 
-  def dagMatcherAndRewriter(finalRDD: RDD[_], nodesList: ArrayList[SimulateRDD], indexOfDagScan: ArrayList[Integer]): Unit = {
+  def dagMatcherAndRewriter(finalRDD: RDD[_], nodesList: ArrayList[SimulateRDD], indexOfDagScan: ArrayList[Integer]): RDD[_] = {
     transformDAGtoList(null, finalRDD, nodesList, indexOfDagScan)
     val repository = CacheManager.getRepository
     if ( repository.size() != 0 ){
@@ -25,14 +25,16 @@ object DAGMatcherAndRewriter {
         val cacheMetaData = ite.next()
         val indexOfCacheDagScan = cacheMetaData.indexOfDagScan
         val cacheNodesList = cacheMetaData.nodesList
-        if ( nodesList.size() >= cacheNodesList.size() && indexOfDagScan.size() >= indexOfCacheDagScan.size()) {
+        if ( nodesList.size() >= cacheNodesList.length && indexOfDagScan.size() >= indexOfCacheDagScan.size()) {
           /**
            * 将cache和DAG中的每个Load操作符进行比较
            */
           val ite = indexOfDagScan.iterator()
+          val hasCheck = new ArrayList[Integer]()
           while ( ite.hasNext ) {
             val idOfDagScan = ite.next()
-            indexOfDagScan.remove(idOfDagScan)
+            hasCheck.add(idOfDagScan)
+//            indexOfDagScan.remove(idOfDagScan)
             /**
              * Matcher
              */
@@ -43,8 +45,8 @@ object DAGMatcherAndRewriter {
              */
             var indexOfdag: Int = idOfDagScan  // dag中Scan操作的位置（可能有多个Scan操作）
             var isMatch = true
-            while (index < cacheNodesList.size() && isMatch) {
-              if (cacheNodesList.get(index).equals(nodesList.get(indexOfdag))) {
+            while (index < cacheNodesList.length && isMatch) {
+              if (cacheNodesList(index).equals(nodesList.get(indexOfdag))) {
                 index = index+1
                 indexOfdag = indexOfdag+1
               } else {
@@ -54,6 +56,7 @@ object DAGMatcherAndRewriter {
             /**
              * Rewriter
              */
+            println("DAGMatcherAndRewriter.scala---isMatch: " + isMatch)
             if (isMatch) {   // 完全匹配则改写DAG
               // check if the input files and the output file is exist
               // 1. check input files
@@ -68,18 +71,31 @@ object DAGMatcherAndRewriter {
               // 2. check output files
               if ( inputFileExist && CacheManager.fileExist(cacheMetaData.outputFilename, "output") ){
                 // after check exist, then check if these files have modified by others
+                println("DAGMatcherAndRewriter.scala---file exist: " + true)
                 if ( CacheManager.checkFilesNotModified(cacheMetaData)){
-                  val realRDD = nodesList.get(indexOfdag - 1).realRDD
+                  println("DAGMatcherAndRewriter.scala---file modified: " + false)
+                  println("DAGMatcherAndRewriter.scala---outputFilename: " + cacheMetaData.outputFilename)
                   val rewriter = finalRDD.sparkContext.objectFile(cacheMetaData.outputFilename)
                   val parent = nodesList.get(indexOfdag - 1).realRDDparent
-                  parent.changeDependeces(rewriter)
+                  if ( parent == null){
+                    nodesList.get(indexOfdag - 1).realRDD = rewriter
+                    rewriter.fromCache = true
+                  } else {
+                    parent.changeDependeces(rewriter)
+                  }
+                }else{
+                  println("DAGMatcherAndRewriter.scala---file modified: " + true)
                 }
+              }else{
+                println("DAGMatcherAndRewriter.scala---file exist: " + false)
               }
             }
           }
+          indexOfDagScan.removeAll(hasCheck)
         }
       }
     }
+    nodesList.get(nodesList.size() - 1).realRDD
   }
 
   /**
@@ -94,18 +110,20 @@ object DAGMatcherAndRewriter {
     }
 
     if ( node.dependencies != null ) {
+      println("rdd" + node.id + "'s dependencies: " + node.dependencies.toString())
       node.dependencies.map(_.rdd).foreach(child => transformDAGtoList(node, child, nodesList, indexOfDagScan))
     }
 
-    val simulateRDD = new SimulateRDD(node.transformation, node.function, node)
+    val simulateRDD = new SimulateRDD(node.transformation, node.function)
+    simulateRDD.realRDD = node
     /**
      * 判断RDD的操作是否是表扫描或者读取外部数据
      */
     nodesList.add(simulateRDD)
-    if ( node.transformation.equalsIgnoreCase("hadoopFile") ){
-      val index = nodesList.indexOf(simulateRDD)
-      node.indexOfnodesList = index    // 记录下该RDD在nodesList的位置，以后需要通过该下标找到RDD对应的SimulateRDD
-      node.indexOfleftInNodesList = index
+    val index = nodesList.indexOf(simulateRDD)
+    node.indexOfnodesList = index    // 记录下该RDD在nodesList的位置，以后需要通过该下标找到RDD对应的SimulateRDD
+    if ( node.transformation.equalsIgnoreCase("textFile") || node.transformation.equalsIgnoreCase("objectFile")  ){
+      node.indexOfleafInNodesList = index
       indexOfDagScan.add(index)
       simulateRDD.inputFileName.add(node.name)
       val modifiedTime = CacheManager.getLastModifiedTimeOfFile(node.name)
@@ -115,17 +133,14 @@ object DAGMatcherAndRewriter {
      * bug2:根节点的allTransformation没有赋值
      */
     simulateRDD.allTransformation.add(simulateRDD.transformation)
-    // 为父节点增加数据
-    if ( parent != null ){
-      if ( parent.indexOfleftInNodesList == -1 ){
-        parent.indexOfleftInNodesList = node.indexOfleftInNodesList
+    // pull data from childs
+    node.dependencies.map(_.rdd).foreach(child => {
+      if (node.indexOfleafInNodesList == -1 ){
+        node.indexOfleafInNodesList = child.indexOfleafInNodesList
       }
-      nodesList.get(parent.indexOfnodesList).inputFileName.addAll(simulateRDD.inputFileName)
-      nodesList.get(parent.indexOfnodesList).inputFileLastModifiedTime.addAll(simulateRDD.inputFileLastModifiedTime)
-      /**
-       * bug3:parent.allTransformation没有将子节点的allTransformation加入
-       */
-      nodesList.get(parent.indexOfnodesList).allTransformation.addAll(simulateRDD.allTransformation)
-    }
+      simulateRDD.inputFileName.addAll(nodesList.get(child.indexOfnodesList).inputFileName)
+      simulateRDD.inputFileLastModifiedTime.addAll(nodesList.get(child.indexOfnodesList).inputFileLastModifiedTime)
+      simulateRDD.allTransformation.addAll(nodesList.get(child.indexOfnodesList).allTransformation)
+    })
   }
 }

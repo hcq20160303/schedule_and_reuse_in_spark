@@ -25,7 +25,7 @@ class RDDShare(private val finalRDD: RDD[_]) {
   /**
    * 匹配及改写：该object将一个输入的DAG和缓存当中的所有DAG进行匹配找到可重用的缓存并改写当前的DAG
    */
-  def dagMatcherAndRewriter: Unit ={
+  def dagMatcherAndRewriter: RDD[_] ={
     DAGMatcherAndRewriter.dagMatcherAndRewriter(finalRDD, nodesList, indexOfDagScan)
   }
 
@@ -45,15 +45,4 @@ object RDDShare{
 
   def getAnnoFunctionCopyPath = conf.getString("rddShare.annoFunctionCopyPath")
 
-  /**
-   * 缓存管理函数：该函数完成缓存的管理工作，当出现以下情况之一触发该操作：
-   * 1. replace
-   * * 1） 缓存总大小超过设定阈值；
-   * * 2） 缓存超过设定时间未更新；
-   * 2. maintain consistency
-   * * 1) 缓存中的某个DAG的输入被删除或者被修改。
-   */
-  def cacheManager(manageType: String, needCacheSize: Double, deleteData: String = null): Unit ={
-    CacheManager.synchronized(CacheManager.replaceCache(manageType, needCacheSize, deleteData))
-  }
 }

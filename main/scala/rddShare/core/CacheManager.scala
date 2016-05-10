@@ -51,8 +51,7 @@ object CacheManager {
     tranformtion_priority
   }
   def tranformtion_priority = TRANSFORMATION_PRIORITY
-
-  private val repository: TreeSet[CacheMetaData] = new TreeSet[CacheMetaData](new Comparator[CacheMetaData]() {
+  val com = new Comparator[CacheMetaData]() with Serializable{
     /**
      * 排序规则：
      * 1. dag树的节点数量越多越靠前
@@ -61,10 +60,10 @@ object CacheManager {
      * 为什么需要排序？是为了保证第一次匹配成功的dag就是最大匹配
      */
     def compare(o1: CacheMetaData, o2: CacheMetaData): Int = {
-      if (o1.nodesList.size() > o2.nodesList.size() ) {       // 1. dag树的节点数量越多越靠前
+      if (o1.nodesList.length > o2.nodesList.length ) {       // 1. dag树的节点数量越多越靠前
         return -1
       }
-      else if (o1.nodesList.size() < o2.nodesList.size() ) {
+      else if (o1.nodesList.length < o2.nodesList.length ) {
         return 1
       }
       else {
@@ -97,7 +96,8 @@ object CacheManager {
         }
       }
     }
-  })
+  }
+  private val repository: TreeSet[CacheMetaData] = new TreeSet[CacheMetaData](com)
   def initRepository: Unit = {
     // load the history cacheMetaData to repository from disk if rddShare system has the history data
     if (Files.exists(Paths.get(resourcesPath+"repository"))){

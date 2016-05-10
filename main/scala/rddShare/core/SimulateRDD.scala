@@ -12,10 +12,10 @@ import org.apache.spark.rdd.RDD
  */
 class SimulateRDD(
       val transformation: String,        // RDD执行的transformation
-      val function: String,              // RDD执行的function
-      @transient val realRDD: RDD[_]     // SimulateRDD对应的Spark RDD
+      val function: String               // RDD执行的function
      ) extends Serializable {
 
+  @transient var realRDD: RDD[_] = null     // SimulateRDD对应的Spark RDD
   @transient var cost: Int = 0           // RDD的估计执行代价
   @transient var realRDDparent: RDD[_] = null   // realRDD的父节点
 
@@ -30,5 +30,12 @@ class SimulateRDD(
       return true
     }
     return false
+  }
+
+  override def toString(): String ={
+    "\ttransformation: " + transformation +
+    "\tfunction: " + function +  "\tinputFileName: " + inputFileName.toString +
+    "\tinputFileLastModifiedTime: " +  inputFileLastModifiedTime.toString +
+    "\tallTransformations: " + allTransformation.toString
   }
 }
