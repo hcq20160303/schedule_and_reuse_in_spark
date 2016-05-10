@@ -54,6 +54,6 @@ object RDDShare{
    * * 1) 缓存中的某个DAG的输入被删除或者被修改。
    */
   def cacheManager(manageType: String, needCacheSize: Double, deleteData: String = null): Unit ={
-    CacheManager.synchronized(CacheManager.cacheManage(manageType, needCacheSize, deleteData))
+    CacheManager.synchronized(CacheManager.replaceCache(manageType, needCacheSize, deleteData))
   }
 }

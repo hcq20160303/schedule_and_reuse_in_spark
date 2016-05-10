@@ -1,7 +1,9 @@
 package rddShare.core
 
 import java.io.File
+import java.util
 import java.util.ArrayList
+import java.util.function.Consumer
 
 import com.typesafe.config.ConfigFactory
 import org.apache.hadoop.conf.Configuration
@@ -47,19 +49,21 @@ object Cacher {
         }else{                                                       // use the local file to cache the data
           fileSize = (new File(cachePath)).length().toDouble/math.pow(1024, 3)
         }
-        val addCache = new CacheMetaData(nodesList.subList(node.realRDD.indexOfleftInNodesList,
-          node.realRDD.indexOfnodesList)
-          , cachePath, fileSize, (end-begin))
-        /**
-         * add need to syn
-         */
-        CacheManager.synchronized{
-          if ( (CacheManager.repositorySize + addCache.sizoOfOutputData) > CacheManager.getRepositoryCapacity){
-            CacheManager.cacheManage("replace", addCache.sizoOfOutputData)
+
+        val modifiedTime = CacheManager.getLastModifiedTimeOfFile(cachePath)
+
+        val cacheNodes = nodesList.subList(node.realRDD.indexOfleftInNodesList, node.realRDD.indexOfnodesList)
+        val indexOfDagScan = new util.ArrayList[Integer]
+        cacheNodes.forEach{ new Consumer[SimulateRDD] {
+          override def accept(t: SimulateRDD): Unit = {
+            if ( t.transformation.equalsIgnoreCase("hadoopFile")){
+              indexOfDagScan.add(cacheNodes.indexOf(t))
+            }
           }
-          CacheManager.getRepository.add(addCache)
-          CacheManager.repositorySize += addCache.sizoOfOutputData
-        }
+        }}
+        val addCache = new CacheMetaData(cacheNodes, indexOfDagScan
+                                         , cachePath, modifiedTime, fileSize, (end-begin))
+        CacheManager.checkCapacityEnoughElseReplace(addCache)
       }
     }
   }

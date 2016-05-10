@@ -1,7 +1,7 @@
 package rddShare.core
 
-import java.util
 import java.util.ArrayList
+import java.util.function.Consumer
 
 import org.apache.spark.rdd.RDD
 
@@ -23,9 +23,8 @@ object DAGMatcherAndRewriter {
       val ite = repository.iterator()
       while ( ite.hasNext ){
         val cacheMetaData = ite.next()
-        val indexOfCacheDagScan = new util.ArrayList[Integer]
-        val cacheNodesList = new util.ArrayList[SimulateRDD]
-        transformDAGtoList(null, cacheMetaData.root.realRDD, cacheNodesList, indexOfCacheDagScan)
+        val indexOfCacheDagScan = cacheMetaData.indexOfDagScan
+        val cacheNodesList = cacheMetaData.nodesList
         if ( nodesList.size() >= cacheNodesList.size() && indexOfDagScan.size() >= indexOfCacheDagScan.size()) {
           /**
            * 将cache和DAG中的每个Load操作符进行比较
@@ -56,15 +55,25 @@ object DAGMatcherAndRewriter {
              * Rewriter
              */
             if (isMatch) {   // 完全匹配则改写DAG
-              // check if this file is exist
-              val exist = CacheManager.fileExist(cacheMetaData.outputFilename)
-              if ( exist ){
-                val realRDD = nodesList.get(indexOfdag - 1).realRDD
-                val rewriter = finalRDD.sparkContext.objectFile(cacheMetaData.outputFilename)
-                val parent = nodesList.get(indexOfdag - 1).realRDDparent
-                parent.changeDependeces(rewriter)
-              }else{
-                CacheManager.synchronized(CacheManager.removeCache(cacheMetaData.outputFilename))
+              // check if the input files and the output file is exist
+              // 1. check input files
+              var inputFileExist = true
+              cacheMetaData.root.inputFileName.forEach(new Consumer[String] {
+                override def accept(t: String): Unit = {
+                  if ( !CacheManager.fileExist(t, "input")){
+                    inputFileExist = false
+                  }
+                }
+              })
+              // 2. check output files
+              if ( inputFileExist && CacheManager.fileExist(cacheMetaData.outputFilename, "output") ){
+                // after check exist, then check if these files have modified by others
+                if ( CacheManager.checkFilesNotModified(cacheMetaData)){
+                  val realRDD = nodesList.get(indexOfdag - 1).realRDD
+                  val rewriter = finalRDD.sparkContext.objectFile(cacheMetaData.outputFilename)
+                  val parent = nodesList.get(indexOfdag - 1).realRDDparent
+                  parent.changeDependeces(rewriter)
+                }
               }
             }
           }
@@ -99,6 +108,8 @@ object DAGMatcherAndRewriter {
       node.indexOfleftInNodesList = index
       indexOfDagScan.add(index)
       simulateRDD.inputFileName.add(node.name)
+      val modifiedTime = CacheManager.getLastModifiedTimeOfFile(node.name)
+      simulateRDD.inputFileLastModifiedTime.add(modifiedTime)
     }
     /**
      * bug2:根节点的allTransformation没有赋值
@@ -110,6 +121,7 @@ object DAGMatcherAndRewriter {
         parent.indexOfleftInNodesList = node.indexOfleftInNodesList
       }
       nodesList.get(parent.indexOfnodesList).inputFileName.addAll(simulateRDD.inputFileName)
+      nodesList.get(parent.indexOfnodesList).inputFileLastModifiedTime.addAll(simulateRDD.inputFileLastModifiedTime)
       /**
        * bug3:parent.allTransformation没有将子节点的allTransformation加入
        */

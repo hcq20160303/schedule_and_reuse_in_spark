@@ -2,6 +2,7 @@ package rddShare.core
 
 import java.io._
 import java.nio.file.{Paths, Files}
+import java.util.function.Consumer
 import java.util.{ArrayList, Comparator, TreeSet, HashMap}
 
 import com.typesafe.config.ConfigFactory
@@ -118,50 +119,42 @@ object CacheManager {
     output.close()
   }
 
+  def checkCapacityEnoughElseReplace(addCache: CacheMetaData): Unit = CacheManager.synchronized{
+    if ( (repositorySize + addCache.sizoOfOutputData) > repositoryCapacity){
+      replaceCache(addCache.sizoOfOutputData)
+    }
+    repository.add(addCache)
+    repositorySize += addCache.sizoOfOutputData
+  }
   /**
-   * 缓存管理函数：该函数完成缓存的管理工作，当出现以下情况之一触发该操作：
-   * 1. replace
-   * * 1） 缓存总大小超过设定阈值；
-   * * 2） 缓存超过设定时间未更新；
-   * 2. maintain consistency
-   * * 1) 缓存中的某个DAG的输入被删除或者被修改。
+   * replace condition: 缓存总大小超过设定阈值；
+   * replace algrothom:
+   * 1. "use" less, replace first
+   * 2. if "use" equal, then less "exeTimeOfDag", replace first
+   * 3. if "exeTimeOfDag" equal, then less size of "sizoOfOutputData", replace first
    */
-  def cacheManage(manageType: String, needCacheSize: Double = 0, deleteData: String = null): Unit = {
-    manageType match {
-      case "replace" => {
-        /**
-         * replace algrothom
-         * 1. "use" less, replace first
-         * 2. if "use" equal, then less "exeTimeOfDag", replace first
-         * 3. if "exeTimeOfDag" equal, then less size of "sizoOfOutputData", replace first
-         */
-        val repo = repository.toArray.asInstanceOf[Array[CacheMetaData]]
-          .sortWith( (x: CacheMetaData, y: CacheMetaData) =>
-            (x.use < y.use && x.exeTimeOfDag < y.exeTimeOfDag && x.sizoOfOutputData < y.sizoOfOutputData) ).iterator
-        var find = false
-        var needCacheSizeCopy = needCacheSize
-        while( repo.hasNext && !find ){
-          val cache = repo.next()
-          if ( cache.sizoOfOutputData >= needCacheSizeCopy ){
-            find = true
-          }else{
-            needCacheSizeCopy -= cache.sizoOfOutputData
-          }
-          removeCache(cache.outputFilename)
-          repository.remove(cache)
-          repositorySize -= cache.sizoOfOutputData
-        }
-      }
+  private def replaceCache( needCacheSize: Double ): Unit = {
 
-      case "consistency" => {
-        /**
-         * maintain consistency
-         */
+    val repo = repository.toArray.asInstanceOf[Array[CacheMetaData]]
+                         .sortWith( (x: CacheMetaData, y: CacheMetaData) =>
+                                    (x.use < y.use && x.exeTimeOfDag < y.exeTimeOfDag
+                                      && x.sizoOfOutputData < y.sizoOfOutputData) ).iterator
+    var find = false
+    var needCacheSizeCopy = needCacheSize
+    while( repo.hasNext && !find ){
+      val cache = repo.next()
+      if ( cache.sizoOfOutputData >= needCacheSizeCopy ){
+        find = true
+      }else{
+        needCacheSizeCopy -= cache.sizoOfOutputData
       }
+      removeCacheFromDisk(cache.outputFilename)
+      repositorySize -= cache.sizoOfOutputData
+      repository.remove(cache)
     }
   }
 
-  def removeCache(pathCache: String): Unit ={
+  def removeCacheFromDisk(pathCache: String): Unit = CacheManager.synchronized{
     if ( repositoryBasePath.contains("hdfs")){   // delete the hdfs file
       val config = new Configuration()
       val path = new Path(pathCache)
@@ -172,22 +165,88 @@ object CacheManager {
     }
   }
 
-  def fileExist(pathFile: String): Boolean ={
+  def fileExist(pathFile: String, fileType: String): Boolean ={
     if ( pathFile.contains("hdfs")){  // hdfs system
       val config = new Configuration()
       val path = new Path(pathFile)
       val hdfs = path.getFileSystem(config)
       if ( !hdfs.exists(path) ){
+        removeCacheFromRepository(pathFile, fileType)
         false
       }else{
         true
       }
     }else{  // local file
       if (!(new File(pathFile).exists())){
+        removeCacheFromRepository(pathFile, fileType)
         false
       }else{
         true
       }
+    }
+  }
+
+  private def removeCacheFromRepository(inputFileName: String, fileType: String): Unit = CacheManager.synchronized{
+    val ite = repository.iterator()
+    fileType match {
+      case "input" => {
+        while ( ite.hasNext){
+          val cache = ite.next()
+          if ( cache.root.inputFileName.contains(inputFileName)){
+            repositorySize -= cache.sizoOfOutputData
+            repository.remove(cache)
+          }
+        }
+      }
+      case "ouput" => {
+        while ( ite.hasNext){
+          val cache = ite.next()
+          if ( cache.outputFilename.equalsIgnoreCase(inputFileName)){
+            repositorySize -= cache.sizoOfOutputData
+            repository.remove(cache)
+          }
+        }
+      }
+    }
+  }
+
+  def getLastModifiedTimeOfFile(filePath: String): Long = {
+    var modifiedTime: Long = 0
+    if ( filePath.contains("hdfs")){   // hdfs file
+      val config = new Configuration()
+      val path = new Path(filePath)
+      val hdfs = path.getFileSystem(config)
+      modifiedTime = hdfs.getFileStatus(path).getModificationTime
+    }else{                             // local file
+      modifiedTime = (new File(filePath)).lastModified()
+    }
+    modifiedTime
+  }
+
+  def checkFilesNotModified(cacheMetaData: CacheMetaData): Boolean = CacheManager.synchronized{
+    val inputFileNames = cacheMetaData.root.inputFileName
+    val inputFilesLastModifiedTime = cacheMetaData.root.inputFileLastModifiedTime
+    inputFileNames.forEach(new Consumer[String] {
+      override def accept(t: String): Unit = {
+        if ( !CacheManager.getLastModifiedTimeOfFile(t).equals(
+          inputFilesLastModifiedTime.get(inputFileNames.indexOf(t)))){
+          // consistency maintain
+          repositorySize -= cacheMetaData.sizoOfOutputData
+          repository.remove(cacheMetaData)
+          return false
+        }
+      }
+    })
+    // 2. check output files
+    val outputFileNotModified = CacheManager.getLastModifiedTimeOfFile(cacheMetaData.outputFilename).equals(cacheMetaData.outputFileLastModifiedTime)
+    if ( outputFileNotModified ){
+      return true
+    }else{
+      // consistency maintain
+      removeCacheFromDisk(cacheMetaData.outputFilename)
+      repositorySize -= cacheMetaData.sizoOfOutputData
+      repository.remove(cacheMetaData)
+      return false
     }
   }
 }

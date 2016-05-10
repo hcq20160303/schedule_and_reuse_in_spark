@@ -20,6 +20,7 @@ class SimulateRDD(
   @transient var realRDDparent: RDD[_] = null   // realRDD的父节点
 
   var inputFileName: ArrayList[String] = new ArrayList[String]          // 以该RDD为根节点的子DAG的输入
+  var inputFileLastModifiedTime: ArrayList[Long] = new ArrayList[Long]  // the last modified time of these file, this use to consistency maintain by CacheManager
   var allTransformation: ArrayList[String] = new ArrayList[String]      // 以该RDD为根节点的子DAG中所有RDD执行的transformation操作
 
   def equals(other: SimulateRDD): Boolean = {
