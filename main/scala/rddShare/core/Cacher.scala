@@ -63,7 +63,7 @@ object Cacher {
         }}
         val addCache = new CacheMetaData(cacheNodes, indexOfDagScan
                                          , cachePath, modifiedTime, fileSize, (end-begin))
-        CacheManager.checkCapacityEnoughElseReplace(addCache)
+        RDDShare.synchronized(CacheManager.checkCapacityEnoughElseReplace(addCache))
       }
     }
   }

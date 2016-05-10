@@ -558,7 +558,7 @@ class DAGScheduler(
       properties: Properties): Unit = {
     if ( !rdd.isCache ){
       val rddShare = new RDDShare(rdd)
-      rddShare.dagMatcherAndRewriter
+      RDDShare.synchronized(rddShare.dagMatcherAndRewriter)
       rddShare.getCache
     }
     val start = System.nanoTime

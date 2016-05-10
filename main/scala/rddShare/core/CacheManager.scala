@@ -119,7 +119,7 @@ object CacheManager {
     output.close()
   }
 
-  def checkCapacityEnoughElseReplace(addCache: CacheMetaData): Unit = CacheManager.synchronized{
+  def checkCapacityEnoughElseReplace(addCache: CacheMetaData): Unit = {
     if ( (repositorySize + addCache.sizoOfOutputData) > repositoryCapacity){
       replaceCache(addCache.sizoOfOutputData)
     }
@@ -154,7 +154,7 @@ object CacheManager {
     }
   }
 
-  def removeCacheFromDisk(pathCache: String): Unit = CacheManager.synchronized{
+  private def removeCacheFromDisk(pathCache: String): Unit = {
     if ( repositoryBasePath.contains("hdfs")){   // delete the hdfs file
       val config = new Configuration()
       val path = new Path(pathCache)
@@ -186,7 +186,7 @@ object CacheManager {
     }
   }
 
-  private def removeCacheFromRepository(inputFileName: String, fileType: String): Unit = CacheManager.synchronized{
+  private def removeCacheFromRepository(inputFileName: String, fileType: String): Unit = {
     val ite = repository.iterator()
     fileType match {
       case "input" => {
@@ -223,7 +223,7 @@ object CacheManager {
     modifiedTime
   }
 
-  def checkFilesNotModified(cacheMetaData: CacheMetaData): Boolean = CacheManager.synchronized{
+  def checkFilesNotModified(cacheMetaData: CacheMetaData): Boolean = {
     val inputFileNames = cacheMetaData.root.inputFileName
     val inputFilesLastModifiedTime = cacheMetaData.root.inputFileLastModifiedTime
     inputFileNames.forEach(new Consumer[String] {
@@ -231,8 +231,7 @@ object CacheManager {
         if ( !CacheManager.getLastModifiedTimeOfFile(t).equals(
           inputFilesLastModifiedTime.get(inputFileNames.indexOf(t)))){
           // consistency maintain
-          repositorySize -= cacheMetaData.sizoOfOutputData
-          repository.remove(cacheMetaData)
+          removeCacheFromRepository(t, "input")
           return false
         }
       }
