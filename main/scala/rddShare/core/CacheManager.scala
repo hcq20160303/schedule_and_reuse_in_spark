@@ -56,11 +56,12 @@ object CacheManager {
      * 排序规则：
      * 1. dag树的节点数量越多越靠前
      * 2. “加载数据”操作符（Scan）越多，则越靠前
-     * 3. 操作符优先级
+     * 3. filename
+     * 4. 操作符优先级
      * 为什么需要排序？是为了保证第一次匹配成功的dag就是最大匹配
      */
     def compare(o1: CacheMetaData, o2: CacheMetaData): Int = {
-      if (o1.nodesList.length > o2.nodesList.length ) {       // 1. dag树的节点数量越多越靠前
+      if (o1.nodesList.length > o2.nodesList.length ) {       // rule 1. dag树的节点数量越多越靠前
         return -1
       }
       else if (o1.nodesList.length < o2.nodesList.length ) {
@@ -69,7 +70,7 @@ object CacheManager {
       else {
         val o1inputFilenames: ArrayList[String] = o1.root.inputFileName
         val o2inputFilenames: ArrayList[String] = o2.root.inputFileName
-        if (o1inputFilenames.size > o2inputFilenames.size) {   // 2. “加载数据”操作符（Scan）越多，则越靠前
+        if (o1inputFilenames.size > o2inputFilenames.size) {   // rule 2. “加载数据”操作符（Scan）越多，则越靠前
           return -1
         }
         else if (o1inputFilenames.size < o2inputFilenames.size) {
@@ -77,16 +78,16 @@ object CacheManager {
         }
         else {
           var compare: Int = 0
-          for( i <- 0 to o1inputFilenames.size-1){
+          for( i <- 0 to o1inputFilenames.size-1){   // rule 3. filename
             compare = o1inputFilenames.get(i).compareToIgnoreCase(o2inputFilenames.get(i))
             if ( compare != 0 ){
               return -compare
             }
           }
+
           val o1allTransformation: ArrayList[String] = o1.root.allTransformation
           val o2allTransformation: ArrayList[String] = o2.root.allTransformation
-
-          for ( i <- 0 to o1allTransformation.size-1) {
+          for ( i <- 0 to o1allTransformation.size-1) {   // rule 4. allTransoformation
             compare = TRANSFORMATION_PRIORITY.get(o1allTransformation.get(i)) - TRANSFORMATION_PRIORITY.get(o2allTransformation.get(i))
             if (compare != 0) {
               return -compare
@@ -108,23 +109,45 @@ object CacheManager {
       while (ite.hasNext){
         val cache = ite.next()
         repository.add(cache)
-        repositorySize += cache.sizoOfOutputData
+        repositorySize += cache.sizeOfOutputData
       }
     }
+    println("CacheManager.scala---initRepository")
+    println("repositorySize: "+ repositorySize + "\trepository.size(): " + repository.size())
+    repository.forEach(new Consumer[CacheMetaData] {
+      override def accept(t: CacheMetaData): Unit = {
+        println("nodesList(0).inputFileName:" + t.nodesList(0).inputFileName + "\t" +
+        "sizoOfOutputData: " + t.sizeOfOutputData+ "\tuse: " + t.use)
+      }
+    })
   }
   def getRepository = repository
   def saveRepository: Unit ={
     val output = new ObjectOutputStream(new FileOutputStream(resourcesPath + "repository"))
     output.writeObject(repository)
     output.close()
+    println("CacheManager.scala---saveRepository")
+    println("repositorySize: "+ repositorySize + "\trepository.size(): " + repository.size())
+    repository.forEach(new Consumer[CacheMetaData] {
+      override def accept(t: CacheMetaData): Unit = {
+        println("nodesList(0).inputFileName:" + t.nodesList(0).inputFileName + "\t" +
+          "sizoOfOutputData: " + t.sizeOfOutputData + "\tuse: " + t.use)
+      }
+    })
   }
 
   def checkCapacityEnoughElseReplace(addCache: CacheMetaData): Unit = {
-    if ( (repositorySize + addCache.sizoOfOutputData) > repositoryCapacity){
-      replaceCache(addCache.sizoOfOutputData)
+    if ( addCache.sizeOfOutputData > repositoryCapacity ){
+      println("CacheManager.scala---checkCapacityEnoughElseReplace")
+      println("sizoOfOutputData is bigger than repositoryCapacity, we suggest you adjust the repositoryCapacity or don't cache this guy")
+    }
+    if ( (repositorySize + addCache.sizeOfOutputData) > repositoryCapacity){
+      println("CacheManager.scala---checkCapacity: (repositorySize: " + repositorySize +
+        " + addCache.sizoOfOutputData: " + addCache.sizeOfOutputData + ") > repositoryCapacity: " + repositoryCapacity)
+      replaceCache(addCache.sizeOfOutputData)
     }
     repository.add(addCache)
-    repositorySize += addCache.sizoOfOutputData
+    repositorySize += addCache.sizeOfOutputData
   }
   /**
    * replace condition: 缓存总大小超过设定阈值；
@@ -134,27 +157,90 @@ object CacheManager {
    * 3. if "exeTimeOfDag" equal, then less size of "sizoOfOutputData", replace first
    */
   private def replaceCache( needCacheSize: Double ): Unit = {
-
-    val repo = repository.toArray.asInstanceOf[Array[CacheMetaData]]
-                         .sortWith( (x: CacheMetaData, y: CacheMetaData) =>
-                                    (x.use < y.use && x.exeTimeOfDag < y.exeTimeOfDag
-                                      && x.sizoOfOutputData < y.sizoOfOutputData) ).iterator
+    // copy a repository to re-sorted
+    val repoCopy = new TreeSet[CacheMetaData]( new Comparator[CacheMetaData]() with Serializable{
+      /**
+       * rules of sort:
+       * 1. less use, near the front more
+       * 2. less exeTimeOfDag, near the front more
+       * 3. less sizeOfOutputData, near the front more
+       * 4. less nodes, near the front more
+       * 5. less Scan, near the front more
+       * 6. small outputFilename, near the front more
+       * why we need sorted? because we can get the less useful CacheMetaData first
+       */
+      def compare(o1: CacheMetaData, o2: CacheMetaData): Int = {
+        if (o1.use < o2.use ) {       // rule 1
+          return -1
+        }
+        else if (o1.use > o2.use ) {
+          return 1
+        }
+        else {
+          if (o1.exeTimeOfDag < o2.exeTimeOfDag) {   // rule 2
+            return -1
+          }
+          else if (o1.exeTimeOfDag > o2.exeTimeOfDag) {
+            return 1
+          }
+          else {
+            if ( o1.sizeOfOutputData < o2.sizeOfOutputData ){  // rule 3
+              return -1
+            }else if ( o1.sizeOfOutputData > o2.sizeOfOutputData ){
+              return 1
+            }else {
+              if ( o1.nodesList.length < o2.nodesList.length){
+                return -1
+              }else if ( o1.nodesList.length > o2.nodesList.length){
+                return 1
+              }else{
+                if ( o1.indexOfDagScan.size() < o2.indexOfDagScan.size() ){
+                  return -1
+                }else if ( o1.indexOfDagScan.size() > o2.indexOfDagScan.size() ){
+                  return 1
+                }else{
+                  return o1.outputFilename.compare(o2.outputFilename)
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+    repository.forEach(new Consumer[CacheMetaData] {
+      override def accept(t: CacheMetaData): Unit = {
+        repoCopy.add(t)
+      }
+    })
+    var repo = repoCopy.iterator()
+    println("CacheManager.scala---replaceCache---sorted repository: ")
+    repo.forEachRemaining(new Consumer[CacheMetaData] {
+      override def accept(t: CacheMetaData): Unit = {
+        println(t.toString)
+      }
+    })
+    // after println, we must re-get the iterator
+    repo = repoCopy.iterator()
     var find = false
     var needCacheSizeCopy = needCacheSize
     while( repo.hasNext && !find ){
       val cache = repo.next()
-      if ( cache.sizoOfOutputData >= needCacheSizeCopy ){
+      if ( cache.sizeOfOutputData >= needCacheSizeCopy ){
         find = true
-      }else{
-        needCacheSizeCopy -= cache.sizoOfOutputData
       }
+      needCacheSizeCopy -= cache.sizeOfOutputData
       removeCacheFromDisk(cache.outputFilename)
-      repositorySize -= cache.sizoOfOutputData
+      repositorySize -= cache.sizeOfOutputData
       repository.remove(cache)
+    }
+    if ( needCacheSizeCopy > 0 ){
+      println("CacheManager.scala---replaceCache")
+      println("needCacheSize is bigger than repositorySize, so the repository only left this guy")
     }
   }
 
   private def removeCacheFromDisk(pathCache: String): Unit = {
+    println("CacheManager.scala---removeCacheFromDisk's remove path: " + pathCache)
     if ( repositoryBasePath.contains("hdfs")){   // delete the hdfs file
       val config = new Configuration()
       val path = new Path(pathCache)
@@ -193,7 +279,7 @@ object CacheManager {
         while ( ite.hasNext){
           val cache = ite.next()
           if ( cache.root.inputFileName.contains(inputFileName)){
-            repositorySize -= cache.sizoOfOutputData
+            repositorySize -= cache.sizeOfOutputData
             repository.remove(cache)
           }
         }
@@ -202,7 +288,7 @@ object CacheManager {
         while ( ite.hasNext){
           val cache = ite.next()
           if ( cache.outputFilename.equalsIgnoreCase(inputFileName)){
-            repositorySize -= cache.sizoOfOutputData
+            repositorySize -= cache.sizeOfOutputData
             repository.remove(cache)
           }
         }
@@ -243,7 +329,7 @@ object CacheManager {
     }else{
       // consistency maintain
       removeCacheFromDisk(cacheMetaData.outputFilename)
-      repositorySize -= cacheMetaData.sizoOfOutputData
+      repositorySize -= cacheMetaData.sizeOfOutputData
       repository.remove(cacheMetaData)
       return false
     }

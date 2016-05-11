@@ -10,16 +10,23 @@ object testWordCount {
 
   private val conf = new SparkConf().setAppName("RDDShare")
     .setMaster("local")
+    .set("spark.executor.memory", "2g")
     .set("spark.eventLog.enabled", "true")
     .set("spark.eventLog.dir", "/home/hcq/Documents/spark_1.5.0/eventLog")
   private val sc = new SparkContext(conf)
 
   def main(args: Array[String]) {
     CacheManager.initRepository
-
-    val wordCount = sc.textFile("/home/hcq/Documents/spark_1.5.0/input/part-00151").flatMap(line => line.split(" ")).
-      map(word => (word, 1)).reduceByKey(_ + _)
-    wordCount.collect()
+  // big input size
+//    val wordCount = sc.textFile("/home/hcq/Documents/spark_1.5.0/input/Rankings/").flatMap(line => line.split(" ")).
+//      map(word => (word, 1)).reduceByKey(_ + _)
+    // small input size
+//    val wordCount = sc.textFile("/home/hcq/Documents/spark_1.5.0/input/part-00151").flatMap(line => line.split(" ")).
+//        map(word => (word, 1)).reduceByKey(_ + _)
+    // test replace cache
+    val wordCount = sc.textFile("/home/hcq/Documents/spark_1.5.0/input/Rankings/part-00000").flatMap(line => line.split(" ")).
+        map(word => (word, 1)).reduceByKey(_ + _)
+    wordCount.saveAsTextFile("/home/hcq/Documents/spark_1.5.0/output/"+ System.currentTimeMillis()+wordCount.transformation)
 
     stopSpark()
   }

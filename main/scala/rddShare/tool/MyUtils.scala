@@ -1,10 +1,18 @@
 package rddShare.tool
 
 import java.io._
+
+import com.typesafe.config.ConfigFactory
+
 /**
  * Created by hcq on 16-5-7.
  */
 object MyUtils {
+
+  val sparkCorePath = getClass.getResource("").getPath.split("target")(0)
+  val resourcesPath = sparkCorePath + "src/main/resources/rddShare/"
+  val conf = ConfigFactory.parseFile(new File(resourcesPath + "default.conf"))
+
   def getFunctionOfRDD(input: InputStream, funClassPath: String): String ={
 //    var function = ""
 //    val pathOfFunctionJava = RDDShare.getAnnoFunctionCopyPath+funClassPath+".class"
@@ -44,5 +52,4 @@ object MyUtils {
     val ois = new ObjectInputStream(bis)
     ois.readObject.asInstanceOf[T]
   }
-
 }

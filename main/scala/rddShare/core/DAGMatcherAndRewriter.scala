@@ -83,6 +83,7 @@ object DAGMatcherAndRewriter {
                   } else {
                     parent.changeDependeces(rewriter)
                   }
+                  cacheMetaData.use += 1   // use add 1 to judge if it should be replaced for future
                 }else{
                   println("DAGMatcherAndRewriter.scala---file modified: " + true)
                 }

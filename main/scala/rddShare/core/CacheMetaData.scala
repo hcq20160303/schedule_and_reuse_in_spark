@@ -7,11 +7,11 @@ import java.util
  * This class use to save the meta data of a cache
  */
 class CacheMetaData(
-      val nodesList: Array[SimulateRDD],        // DAG图的各个节点
+      val nodesList: Array[SimulateRDD],            // DAG图的各个节点
       val indexOfDagScan: util.ArrayList[Integer],  // the leaf nodes(read file) of this DAG
       val outputFilename: String,                   // 结果保存的文件名
       val outputFileLastModifiedTime: Long,         // use to maintain consistency
-      val sizoOfOutputData: Double,
+      val sizeOfOutputData: Double,
       val exeTimeOfDag: Long
      ) extends Serializable {
 
@@ -19,8 +19,8 @@ class CacheMetaData(
   var use: Int = 0
 
   override def toString: String ={
-    "nodesList: " + nodesList.foreach(x => println(x.toString())) + "\tindexOfDagScan: "+indexOfDagScan.toString +
+    "nodesList: " + nodesList.map(_.toString()) + "\tindexOfDagScan: "+indexOfDagScan.toString +
     "outputFilename: " + outputFilename + "\toutputFileLastModifiedTime: " + outputFileLastModifiedTime +
-    "sizoOfOutputData: " + sizoOfOutputData + "\texeTimeOfDag: " + exeTimeOfDag
+    "sizoOfOutputData: " + sizeOfOutputData + "\texeTimeOfDag: " + exeTimeOfDag
   }
 }

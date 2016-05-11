@@ -5,6 +5,7 @@ import java.util
 import java.util.ArrayList
 
 import com.typesafe.config.ConfigFactory
+import org.apache.commons.io.FileUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 
@@ -49,7 +50,9 @@ object Cacher {
           val cSummary = hdfs.getContentSummary(path)
           fileSize = cSummary.getLength().toDouble/math.pow(1024, 3)
         }else{                                                       // use the local file to cache the data
-          fileSize = (new File(cachePath)).length().toDouble/math.pow(1024, 3)
+          println("Cache.scala---getCacheRDD")
+          fileSize = FileUtils.sizeOfDirectoryAsBigInteger(new File(cachePath)).doubleValue()/math.pow(1024, 3)
+          println("fileSize: " + fileSize)
         }
 
         val modifiedTime = CacheManager.getLastModifiedTimeOfFile(cachePath)
@@ -58,6 +61,7 @@ object Cacher {
         val cacheNodes = new Array[SimulateRDD](sub.size())
         sub.toArray[SimulateRDD](cacheNodes)
         val indexOfDagScan = new util.ArrayList[Integer]
+        println("CacheNodes: ")
         cacheNodes.foreach( t => {
           println(t)
           if ( t.transformation.equalsIgnoreCase("textFile") || t.transformation.equalsIgnoreCase("objectFile")){
