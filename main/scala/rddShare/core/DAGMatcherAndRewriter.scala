@@ -13,7 +13,7 @@ import org.apache.spark.rdd.RDD
 
 object DAGMatcherAndRewriter {
 
-  def dagMatcherAndRewriter(finalRDD: RDD[_], nodesList: ArrayList[SimulateRDD], indexOfDagScan: ArrayList[Integer]): RDD[_] = {
+  def dagMatcherAndRewriter(rddShare: RDDShare, finalRDD: RDD[_], nodesList: ArrayList[SimulateRDD], indexOfDagScan: ArrayList[Integer]): Unit = {
     transformDAGtoList(null, finalRDD, nodesList, indexOfDagScan)
     val repository = CacheManager.getRepository
     if ( repository.size() != 0 ){
@@ -75,11 +75,11 @@ object DAGMatcherAndRewriter {
                 if ( CacheManager.checkFilesNotModified(cacheMetaData)){
                   println("DAGMatcherAndRewriter.scala---file modified: " + false)
                   println("DAGMatcherAndRewriter.scala---outputFilename: " + cacheMetaData.outputFilename)
-                  val rewriter = finalRDD.sparkContext.objectFile(cacheMetaData.outputFilename)
+                  val realRDD = nodesList.get(indexOfdag - 1).realRDD
+                  val rewriter = finalRDD.sparkContext.objectFile(cacheMetaData.outputFilename, realRDD.partitions.size)
                   val parent = nodesList.get(indexOfdag - 1).realRDDparent
                   if ( parent == null){
-                    nodesList.get(indexOfdag - 1).realRDD = rewriter
-                    rewriter.fromCache = true
+                    rddShare.setFinalRDD(rewriter)
                   } else {
                     parent.changeDependeces(rewriter)
                   }
@@ -92,10 +92,14 @@ object DAGMatcherAndRewriter {
             }
           }
           indexOfDagScan.removeAll(hasCheck)
+          hasCheck.clear()
         }
       }
     }
-    nodesList.get(nodesList.size() - 1).realRDD
+    // the dependencies of finalRdd may be changed, so we need transform it again
+    nodesList.clear()
+    indexOfDagScan.clear()
+    transformDAGtoList(null, rddShare.getFinalRDD, nodesList, indexOfDagScan)
   }
 
   /**

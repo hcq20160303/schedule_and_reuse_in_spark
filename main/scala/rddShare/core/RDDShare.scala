@@ -16,7 +16,7 @@ import org.apache.spark.rdd.RDD
  * 2. Cacher: use to select some sub-dag to cache to the repository
  * 3. CacheManager: use to manager the repository
  */
-class RDDShare(private val finalRDD: RDD[_]) {
+class RDDShare(private var finalRDD: RDD[_]) {
 
   private val nodesList = new ArrayList[SimulateRDD]       // 按深度遍历的顺序得到DAG图的各个节点
   private val cacheRDD = new ArrayList[RDD[_]]             // DAG中需要缓存的RDD
@@ -25,8 +25,8 @@ class RDDShare(private val finalRDD: RDD[_]) {
   /**
    * 匹配及改写：该object将一个输入的DAG和缓存当中的所有DAG进行匹配找到可重用的缓存并改写当前的DAG
    */
-  def dagMatcherAndRewriter: RDD[_] ={
-    DAGMatcherAndRewriter.dagMatcherAndRewriter(finalRDD, nodesList, indexOfDagScan)
+  def dagMatcherAndRewriter: Unit ={
+    DAGMatcherAndRewriter.dagMatcherAndRewriter(this, finalRDD, nodesList, indexOfDagScan)
   }
 
   /**
@@ -35,6 +35,12 @@ class RDDShare(private val finalRDD: RDD[_]) {
   def getCache: Unit ={
     Cacher.getCacheRDD(nodesList)
   }
+
+  def setFinalRDD(newFinal: RDD[_]): Unit ={
+    this.finalRDD = newFinal
+  }
+
+  def getFinalRDD = finalRDD
 }
 
 object RDDShare{

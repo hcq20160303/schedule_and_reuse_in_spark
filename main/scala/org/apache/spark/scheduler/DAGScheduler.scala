@@ -559,8 +559,8 @@ class DAGScheduler(
     var newRDD: RDD[T] = null
     if ( !rdd.isCache ){
       val rddShare = new RDDShare(rdd)
-      RDDShare.synchronized(
-        newRDD = rddShare.dagMatcherAndRewriter.asInstanceOf[RDD[T]] )
+      RDDShare.synchronized(rddShare.dagMatcherAndRewriter )
+      newRDD = rddShare.getFinalRDD.asInstanceOf[RDD[T]]
       rddShare.getCache
     }
     val start = System.nanoTime
