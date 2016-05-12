@@ -16,6 +16,13 @@ object DAGMatcherAndRewriter {
   def dagMatcherAndRewriter(rddShare: RDDShare, finalRDD: RDD[_], nodesList: ArrayList[SimulateRDD], indexOfDagScan: ArrayList[Integer]): Unit = {
     transformDAGtoList(null, finalRDD, nodesList, indexOfDagScan)
     val repository = CacheManager.getRepository
+    println("DAGMatcherAndRewriter.dagMatcherAndRewriter: CacheManager.getRepository")
+    repository.forEach(new Consumer[CacheMetaData] {
+      override def accept(t: CacheMetaData): Unit = {
+        println("nodesList(0).inputFileName:" + t.nodesList(0).inputFileName + "\t" +
+          "sizoOfOutputData: " + t.sizeOfOutputData + "\tuse: " + t.use)
+      }
+    })
     if ( repository.size() != 0 ){
       /**
        * 将输入dag和仓库一一进行匹配

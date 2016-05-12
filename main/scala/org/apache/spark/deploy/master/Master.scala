@@ -199,9 +199,6 @@ private[deploy] class Master(
     applicationMetricsSystem.stop()
     persistenceEngine.close()
     leaderElectionAgent.stop()
-
-    // save the repository of RDDShare System
-    CacheManager.saveRepository
   }
 
   override def electedLeader() {
@@ -1062,6 +1059,8 @@ private[deploy] object Master extends Logging {
     val args = new MasterArguments(argStrings, conf)
     val (rpcEnv, _, _) = startRpcEnvAndEndpoint(args.host, args.port, args.webUiPort, conf)
     rpcEnv.awaitTermination()
+    // save the repository of RDDShare System
+    CacheManager.saveRepository
   }
 
   /**

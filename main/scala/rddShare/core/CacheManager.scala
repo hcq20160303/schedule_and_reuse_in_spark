@@ -148,6 +148,13 @@ object CacheManager {
     }
     repository.add(addCache)
     repositorySize += addCache.sizeOfOutputData
+    println("CacheManager.checkCapacityEnoughElseReplace: repository contents")
+    repository.forEach(new Consumer[CacheMetaData] {
+      override def accept(t: CacheMetaData): Unit = {
+        println("nodesList(0).inputFileName:" + t.nodesList(0).inputFileName + "\t" +
+          "sizoOfOutputData: " + t.sizeOfOutputData + "\tuse: " + t.use)
+      }
+    })
   }
   /**
    * replace condition: 缓存总大小超过设定阈值；
