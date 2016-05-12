@@ -8,7 +8,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 object RddShareCopy {
 
-  private val conf = new SparkConf().setAppName("RDDShare")
+  private val conf = new SparkConf().setAppName("RDDShareCopy")
     .set("spark.eventLog.enabled", "true")
     .set("spark.eventLog.dir", "/home/hcq/Documents/spark_1.5.0/eventLog")
   private val sc = new SparkContext(conf)

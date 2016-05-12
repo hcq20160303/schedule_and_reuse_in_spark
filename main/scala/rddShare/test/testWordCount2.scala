@@ -6,7 +6,7 @@ import rddShare.core.CacheManager
 /**
  * Created by hcq on 16-5-10.
  */
-object testWordCount {
+object testWordCount2 {
 
   private val conf = new SparkConf().setAppName("WordCount")
 //    .setMaster("local")
