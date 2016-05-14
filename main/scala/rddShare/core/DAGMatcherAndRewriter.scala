@@ -20,7 +20,7 @@ object DAGMatcherAndRewriter {
     repository.forEach(new Consumer[CacheMetaData] {
       override def accept(t: CacheMetaData): Unit = {
         println("nodesList(0).inputFileName:" + t.nodesList(0).inputFileName + "\t" +
-          "sizoOfOutputData: " + t.sizeOfOutputData + "\tuse: " + t.use)
+          "sizoOfOutputData: " + t.sizeOfOutputData + "\tuse: " + t.reuse)
       }
     })
     if ( repository.size() != 0 ){
@@ -90,7 +90,7 @@ object DAGMatcherAndRewriter {
                   } else {
                     parent.changeDependeces(rewriter)
                   }
-                  cacheMetaData.use += 1   // use add 1 to judge if it should be replaced for future
+                  cacheMetaData.reuse += 1   // use add 1 to judge if it should be replaced for future
                 }else{
                   println("DAGMatcherAndRewriter.scala---file modified: " + true)
                 }

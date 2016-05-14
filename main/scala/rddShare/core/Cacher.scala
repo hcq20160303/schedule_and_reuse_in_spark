@@ -9,14 +9,15 @@ import org.apache.commons.io.FileUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 
+import scala.tools.nsc.Properties
+
 /**
  * Created by hcq on 16-5-9.
  */
 object Cacher {
 
-  private val sparkCorePath = getClass.getResource("").getPath.split("target")(0)
-  private val resourcesPath = sparkCorePath + "src/main/resources/rddShare/"
-  private val conf = ConfigFactory.parseFile(new File(resourcesPath + "default.conf"))
+  val confPath = Properties.envOrElse("SPARK_HOME", "/home/hcq/Desktop/spark_1.5.0")
+  val conf = ConfigFactory.parseFile(new File(confPath + "/conf/rddShare/default.conf"))
 
   // a RDD which execute a transformation in CACHE_TRANSFORMATION will be chosen to
   // store in repostory, and reuse by other application
@@ -68,7 +69,7 @@ object Cacher {
             indexOfDagScan.add(cacheNodes.indexOf(t))
           }
         })
-        val addCache = new CacheMetaData(cacheNodes, indexOfDagScan
+        val addCache = new CacheMetaData(0, cacheNodes, indexOfDagScan
           , cachePath, modifiedTime, fileSize, (end-begin))
         RDDShare.synchronized(CacheManager.checkCapacityEnoughElseReplace(addCache))
       }

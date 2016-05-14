@@ -11,6 +11,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 
 import scala.io.Source
+import scala.tools.nsc.Properties
 import scala.util.parsing.json.JSON
 
 /**
@@ -18,9 +19,8 @@ import scala.util.parsing.json.JSON
  */
 object CacheManager {
 
-  val sparkCorePath = getClass.getResource("").getPath.split("target")(0)
-  val resourcesPath = sparkCorePath + "src/main/resources/rddShare/"
-  val conf = ConfigFactory.parseFile(new File(resourcesPath + "default.conf"))
+  val confPath = Properties.envOrElse("SPARK_HOME", "/home/hcq/Desktop/spark_1.5.0")
+  val conf = ConfigFactory.parseFile(new File(confPath + "/conf/rddShare/default.conf"))
   private val repositoryBasePath: String = conf.getString("rddShare.repositoryBasePath")
   def getRepositoryBasePath = repositoryBasePath
 
@@ -35,7 +35,7 @@ object CacheManager {
 
     val tranformtion_priority = new HashMap[String, Integer]
 
-    val jsonLines = Source.fromFile(resourcesPath + "transformation.json").getLines()
+    val jsonLines = Source.fromFile(confPath + "/conf/rddShare/transformation.json").getLines()
     jsonLines.foreach( line => {
       val transformationAndPriority = JSON.parseFull(line)
       transformationAndPriority match {
@@ -101,8 +101,8 @@ object CacheManager {
   private val repository: TreeSet[CacheMetaData] = new TreeSet[CacheMetaData](com)
   def initRepository: Unit = {
     // load the history cacheMetaData to repository from disk if rddShare system has the history data
-    if (Files.exists(Paths.get(resourcesPath+"repository"))){
-      val input = new ObjectInputStream(new FileInputStream(resourcesPath + "repository"))
+    if (Files.exists(Paths.get(confPath+"/conf/rddShare/repository"))){
+      val input = new ObjectInputStream(new FileInputStream(confPath+"/conf/rddShare/repository"))
       val repo = input.readObject().asInstanceOf[TreeSet[CacheMetaData]]
       input.close()
       val ite = repo.iterator()
@@ -117,13 +117,13 @@ object CacheManager {
     repository.forEach(new Consumer[CacheMetaData] {
       override def accept(t: CacheMetaData): Unit = {
         println("nodesList(0).inputFileName:" + t.nodesList(0).inputFileName + "\t" +
-        "sizoOfOutputData: " + t.sizeOfOutputData+ "\tuse: " + t.use)
+        "sizoOfOutputData: " + t.sizeOfOutputData+ "\tuse: " + t.reuse)
       }
     })
   }
   def getRepository = repository
   def saveRepository: Unit ={
-    val output = new ObjectOutputStream(new FileOutputStream(resourcesPath + "repository"))
+    val output = new ObjectOutputStream(new FileOutputStream(confPath+"/conf/rddShare/repository"))
     output.writeObject(repository)
     output.close()
     println("CacheManager.scala---saveRepository")
@@ -131,7 +131,7 @@ object CacheManager {
     repository.forEach(new Consumer[CacheMetaData] {
       override def accept(t: CacheMetaData): Unit = {
         println("nodesList(0).inputFileName:" + t.nodesList(0).inputFileName + "\t" +
-          "sizoOfOutputData: " + t.sizeOfOutputData + "\tuse: " + t.use)
+          "sizoOfOutputData: " + t.sizeOfOutputData + "\tuse: " + t.reuse)
       }
     })
   }
@@ -152,7 +152,7 @@ object CacheManager {
     repository.forEach(new Consumer[CacheMetaData] {
       override def accept(t: CacheMetaData): Unit = {
         println("nodesList(0).inputFileName:" + t.nodesList(0).inputFileName + "\t" +
-          "sizoOfOutputData: " + t.sizeOfOutputData + "\tuse: " + t.use)
+          "sizoOfOutputData: " + t.sizeOfOutputData + "\tuse: " + t.reuse)
       }
     })
   }
@@ -177,10 +177,10 @@ object CacheManager {
        * why we need sorted? because we can get the less useful CacheMetaData first
        */
       def compare(o1: CacheMetaData, o2: CacheMetaData): Int = {
-        if (o1.use < o2.use ) {       // rule 1
+        if (o1.reuse < o2.reuse ) {       // rule 1
           return -1
         }
-        else if (o1.use > o2.use ) {
+        else if (o1.reuse > o2.reuse ) {
           return 1
         }
         else {
@@ -196,17 +196,17 @@ object CacheManager {
             }else if ( o1.sizeOfOutputData > o2.sizeOfOutputData ){
               return 1
             }else {
-              if ( o1.nodesList.length < o2.nodesList.length){
+              if ( o1.nodesList.length < o2.nodesList.length){  // rule 4
                 return -1
               }else if ( o1.nodesList.length > o2.nodesList.length){
                 return 1
               }else{
-                if ( o1.indexOfDagScan.size() < o2.indexOfDagScan.size() ){
+                if ( o1.indexOfDagScan.size() < o2.indexOfDagScan.size() ){  // rule 5
                   return -1
                 }else if ( o1.indexOfDagScan.size() > o2.indexOfDagScan.size() ){
                   return 1
                 }else{
-                  return o1.outputFilename.compare(o2.outputFilename)
+                  return o1.outputFilename.compare(o2.outputFilename)   // rule 5
                 }
               }
             }

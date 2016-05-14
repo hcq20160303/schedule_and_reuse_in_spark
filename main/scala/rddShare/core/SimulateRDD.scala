@@ -15,8 +15,8 @@ class SimulateRDD(
       val function: String               // RDD执行的function
      ) extends Serializable {
 
-  @transient var realRDD: RDD[_] = null     // SimulateRDD对应的Spark RDD
-  @transient var cost: Int = 0           // RDD的估计执行代价
+  @transient var realRDD: RDD[_] = null         // SimulateRDD对应的Spark RDD
+  @transient var cost: Int = 0                  // RDD的估计执行代价
   @transient var realRDDparent: RDD[_] = null   // realRDD的父节点
 
   var inputFileName: ArrayList[String] = new ArrayList[String]          // 以该RDD为根节点的子DAG的输入
