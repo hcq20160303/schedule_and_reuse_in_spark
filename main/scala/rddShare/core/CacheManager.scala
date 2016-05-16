@@ -19,6 +19,8 @@ import scala.util.parsing.json.JSON
  */
 object CacheManager {
 
+
+
   val confPath = Properties.envOrElse("SPARK_HOME", "/home/hcq/Desktop/spark_1.5.0")
   val conf = ConfigFactory.parseFile(new File(confPath + "/conf/rddShare/default.conf"))
   private val repositoryBasePath: String = conf.getString("rddShare.repositoryBasePath")
