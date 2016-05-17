@@ -1,0 +1,8 @@
+textFile 10
+objectFile 10
+map 20
+flatMap 30
+join 50
+union 40
+reduceByKey 70
+groupByKey 60
