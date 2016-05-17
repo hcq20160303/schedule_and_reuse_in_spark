@@ -38,6 +38,7 @@ object DAGMatcherAndRewriter {
            */
           val ite = indexOfDagScan.iterator()
           val hasCheck = new ArrayList[Integer]()
+          var isMatch = true
           while ( ite.hasNext ) {
             val idOfDagScan = ite.next()
             hasCheck.add(idOfDagScan)
@@ -51,12 +52,14 @@ object DAGMatcherAndRewriter {
              * 因此，变量indexOfDagScan不是固定的，需要根据匹配情况更改.
              */
             var indexOfdag: Int = idOfDagScan  // dag中Scan操作的位置（可能有多个Scan操作）
-            var isMatch = true
+            println("DAGMatcherAndRewriter.dagMatcherAndRewriter: ")
             while (index < cacheNodesList.length && isMatch) {
               if (cacheNodesList(index).equals(nodesList.get(indexOfdag))) {
                 index = index+1
                 indexOfdag = indexOfdag+1
               } else {
+                println("cacheNodesList(index)): " + cacheNodesList(index))
+                println("nodesList.get(indexOfdag): " + nodesList.get(indexOfdag))
                 isMatch = false
               }
             }
@@ -102,7 +105,9 @@ object DAGMatcherAndRewriter {
               }
             }
           }
-          indexOfDagScan.removeAll(hasCheck)
+          if ( isMatch ){
+            indexOfDagScan.removeAll(hasCheck)
+          }
           hasCheck.clear()
         }
       }

@@ -136,9 +136,9 @@ object CacheManager {
         implicit val formats = Serialization.formats(NoTypeHints)
         val nodesList = read[Array[SimulateRDD]](rs.getString("nodesList"))
         val indexOfDagScan = read[util.ArrayList[Integer]](rs.getString("indexOfDagScan"))
-        val outputFileLastModifiedTime = rs.getDouble("outputFileLastModifiedTime")
+        val outputFileLastModifiedTime = rs.getLong("outputFileLastModifiedTime")
         val sizeOfOutputData = rs.getDouble("sizeOfOutputData")
-        val exeTimeOfDag = rs.getDouble("exeTimeOfDag")
+        val exeTimeOfDag = rs.getLong("exeTimeOfDag")
         val reuse = rs.getInt("reuse")
         val outputFilename = rs.getString("outputFilename")
         val insertTime = rs.getTimestamp("insertTime")
@@ -163,6 +163,7 @@ object CacheManager {
   def getRepository = repository
   private def reinitRepositoryfromDatabase = {
     repository.clear()
+    repositorySize = 0
     initRepository
   }
 //  def saveRepository: Unit ={
@@ -295,18 +296,18 @@ object CacheManager {
       var needCacheSizeCopy = needCacheSize
       while( repo.hasNext && !find ){
         val cache = repo.next()
-        if ( cache.sizeOfOutputData >= needCacheSizeCopy ){
-          find = true
-        }
         needCacheSizeCopy -= cache.sizeOfOutputData
         removeCacheFromDisk(cache.outputFilename)
         deletefromDatabase(cache)
         repositorySize -= cache.sizeOfOutputData
         repository.remove(cache)
+        if ( (repositoryCapacity - repositorySize) >= needCacheSizeCopy ){
+          find = true
+        }
       }
       if ( needCacheSizeCopy > 0 ){
         println("CacheManager.scala---replaceCache")
-        println("needCacheSize is bigger than repositorySize, so the repository only left this guy")
+        println("needCacheSize is bigger than repositoryCapacity, so the repository only left this guy")
       }
     }
   }
