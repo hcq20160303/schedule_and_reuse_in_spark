@@ -26,6 +26,7 @@ class RDDShare(private var finalRDD: RDD[_]) {
    * 匹配及改写：该object将一个输入的DAG和缓存当中的所有DAG进行匹配找到可重用的缓存并改写当前的DAG
    */
   def dagMatcherAndRewriter: Unit ={
+    CacheManager.initRepository
     DAGMatcherAndRewriter.dagMatcherAndRewriter(this, finalRDD, nodesList, indexOfDagScan)
   }
 

@@ -1,5 +1,6 @@
 package rddShare.core
 
+import java.sql.Timestamp
 import java.util
 
 /**
@@ -13,7 +14,8 @@ class CacheMetaData(
       val outputFilename: String,                   // 结果保存的文件名
       val outputFileLastModifiedTime: Double,       // use to maintain consistency
       val sizeOfOutputData: Double,
-      val exeTimeOfDag: Double
+      val exeTimeOfDag: Double,
+      val insertTime: Timestamp
      ) extends Serializable {
 
   val root = nodesList(nodesList.length-1)  // DAG的根节点

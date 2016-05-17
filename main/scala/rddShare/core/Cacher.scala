@@ -2,7 +2,7 @@ package rddShare.core
 
 import java.io._
 import java.util
-import java.util.ArrayList
+import java.util.{Calendar, ArrayList}
 
 import com.typesafe.config.ConfigFactory
 import org.apache.commons.io.FileUtils
@@ -69,8 +69,11 @@ object Cacher {
             indexOfDagScan.add(cacheNodes.indexOf(t))
           }
         })
+        val calendar = Calendar.getInstance()
+        val now = calendar.getTime()
+        val insertTime = new java.sql.Timestamp(now.getTime())
         val addCache = new CacheMetaData(0, cacheNodes, indexOfDagScan
-          , cachePath, modifiedTime, fileSize, (end-begin))
+          , cachePath, modifiedTime, fileSize, (end-begin), insertTime)
         RDDShare.synchronized(CacheManager.checkCapacityEnoughElseReplace(addCache))
       }
       i -= 1

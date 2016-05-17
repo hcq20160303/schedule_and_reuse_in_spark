@@ -20,9 +20,7 @@ object RddShareCopy {
 
   def main(args: Array[String]) {
 
-    connectMysql
-
-
+//    connectMysql
     println(Properties.envOrElse("SPARK_HOME", "/home/hcq/Desktop/spark"))
     val re = sc.objectFile("/home/hcq/Documents/spark_1.5.0/repository/8969451351462891627711reduceByKey")
     re.foreach(println)

@@ -1,7 +1,6 @@
 package rddShare.test
 
 import org.apache.spark.{SparkConf, SparkContext}
-import rddShare.core.CacheManager
 
 /**
  * Created by hcq on 16-5-10.
@@ -9,15 +8,15 @@ import rddShare.core.CacheManager
 object testWordCount {
 
   private val conf = new SparkConf().setAppName("WordCount")
-//    .setMaster("local")
-    .setMaster("spark://192.168.1.105:7077")
+    .setMaster("local")
+//    .setMaster("spark://192.168.1.105:7077")
     .set("spark.executor.memory", "2g")
     .set("spark.eventLog.enabled", "true")
     .set("spark.eventLog.dir", "/home/hcq/Documents/spark_1.5.0/eventLog")
   private val sc = new SparkContext(conf)
 
   def main(args: Array[String]) {
-    CacheManager.initRepository
+//    CacheManager.initRepository
   // big input size
 //    val wordCount = sc.textFile("/home/hcq/Documents/spark_1.5.0/input/Rankings/").flatMap(line => line.split(" ")).
 //      map(word => (word, 1)).reduceByKey(_ + _)
@@ -33,7 +32,7 @@ object testWordCount {
   }
 
   def stopSpark() {
-    CacheManager.saveRepository
+//    CacheManager.saveRepository
     sc.stop()
   }
 

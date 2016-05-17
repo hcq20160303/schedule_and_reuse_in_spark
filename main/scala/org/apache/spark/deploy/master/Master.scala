@@ -38,7 +38,6 @@ import org.apache.spark.serializer.{JavaSerializer, Serializer}
 import org.apache.spark.ui.SparkUI
 import org.apache.spark.util.{SignalLogger, ThreadUtils, Utils}
 import org.apache.spark.{Logging, SecurityManager, SparkConf, SparkException}
-import rddShare.core.CacheManager
 
 import scala.collection.mutable.{ArrayBuffer, HashMap, HashSet}
 import scala.language.postfixOps
@@ -178,8 +177,6 @@ private[deploy] class Master(
     persistenceEngine = persistenceEngine_
     leaderElectionAgent = leaderElectionAgent_
 
-    // init the repository of RDDShare System
-    CacheManager.initRepository
   }
 
   override def onStop() {
@@ -1059,8 +1056,6 @@ private[deploy] object Master extends Logging {
     val args = new MasterArguments(argStrings, conf)
     val (rpcEnv, _, _) = startRpcEnvAndEndpoint(args.host, args.port, args.webUiPort, conf)
     rpcEnv.awaitTermination()
-    // save the repository of RDDShare System
-    CacheManager.saveRepository
   }
 
   /**

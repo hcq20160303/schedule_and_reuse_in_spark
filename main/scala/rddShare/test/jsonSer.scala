@@ -16,8 +16,14 @@ import scala.collection.mutable.ArrayBuffer
 object jsonSer {
 
   def main(args: Array[String]) {
+    implicit val formats = Serialization.formats(NoTypeHints)
 
-    println()
+    val tran = new util.HashMap[String, Integer]
+    tran.put("hello", 1)
+    tran.put("hello3", 3)
+    tran.put("hello33", 33)
+    val tranjs = write(tran)
+    println(tranjs)
 
     val nodesList = new ArrayBuffer[SimulateRDD]
     val index = new util.ArrayList[Integer]()
@@ -26,7 +32,7 @@ object jsonSer {
       nodesList += srdd
       index.add(i)
     }
-    implicit val formats = Serialization.formats(NoTypeHints)
+
     val js = write(nodesList.toArray[SimulateRDD])
     println(js)
     val cacheCopy = read[Array[SimulateRDD]](js)

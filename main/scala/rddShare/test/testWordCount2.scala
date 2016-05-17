@@ -33,7 +33,6 @@ object testWordCount2 {
   }
 
   def stopSpark() {
-    CacheManager.saveRepository
     sc.stop()
   }
 
