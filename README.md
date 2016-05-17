@@ -13,3 +13,5 @@ Before you use this source code, there are three conf files(default.conf, transf
 After that, you should set your own configure using default.conf file. And you can set the transformation priority in transformation file. As I use mysql to store the metadata of cache, so you need to create the database and table in mysql, you can use the rddShare.sql to create.
 
 OK, you can run the example in $SPARK_HOME/core/src/main/scala/rddShare/test/testWordCount.scala. If you want to run your own example, please use the support transformations.
+
+If there're any problem, you can contact me with qq: 1119846114
