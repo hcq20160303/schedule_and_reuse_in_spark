@@ -96,7 +96,7 @@ object DAGMatcherAndRewriter {
                   cacheMetaData.reuse += 1   // use add 1 to judge if it should be replaced for future
                   val newReuse = cacheMetaData.reuse
                   val id = cacheMetaData.id
-                  CacheManager.updatefromDatabase(s"update repository set reuse = $newReuse where id = $id")
+                  CacheManager.updatefromDatabase(s"update repository set reuse = reuse + 1 where id = $id")
                 }else{
                   println("DAGMatcherAndRewriter.scala---file modified: " + true)
                 }
